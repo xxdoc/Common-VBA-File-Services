@@ -129,7 +129,7 @@ End Property
 Private Property Get ItmInf(Optional ByRef entry As Collection) As String
     On Error Resume Next ' in case this has never been collected
     ItmInf = entry("I")(POS_ITMINF)
-    If err.Number <> 0 Then ItmInf = vbNullString
+    If Err.Number <> 0 Then ItmInf = vbNullString
 End Property
 
 Private Property Get ItmLvl(Optional ByRef entry As Collection) As Long
@@ -147,7 +147,7 @@ End Property
 Private Property Get NtryScsElpsd(Optional ByRef entry As Collection) As Currency
     On Error Resume Next
     NtryScsElpsd = entry("SE")
-    If err.Number <> 0 Then NtryScsElpsd = Space$(Len(sFrmtScsElpsd))
+    If Err.Number <> 0 Then NtryScsElpsd = Space$(Len(sFrmtScsElpsd))
 End Property
 
 Private Property Let NtryScsElpsd(Optional ByRef entry As Collection, ByRef cy As Currency)
@@ -157,7 +157,7 @@ End Property
 Private Property Get NtryScsGrss(Optional ByRef entry As Collection) As Currency
     On Error Resume Next ' in case no value exists (the case for each begin entry)
     NtryScsGrss = entry("SG")
-    If err.Number <> 0 Then NtryScsGrss = Space$(Len(sFrmtScsGrss))
+    If Err.Number <> 0 Then NtryScsGrss = Space$(Len(sFrmtScsGrss))
 End Property
 
 Private Property Let NtryScsGrss(Optional ByRef entry As Collection, ByRef cy As Currency)
@@ -167,7 +167,7 @@ End Property
 Private Property Get NtryScsNt(Optional ByRef entry As Collection) As Double
     On Error Resume Next
     NtryScsNt = entry("SN")
-    If err.Number <> 0 Then NtryScsNt = Space$(Len(sFrmtScsNt))
+    If Err.Number <> 0 Then NtryScsNt = Space$(Len(sFrmtScsNt))
 End Property
 
 Private Property Let NtryScsNt(Optional ByRef entry As Collection, ByRef dbl As Double)
@@ -177,7 +177,7 @@ End Property
 Private Property Get NtryScsOvrhdItm(Optional ByRef entry As Collection) As Double
     On Error Resume Next
     NtryScsOvrhdItm = entry("SOI")
-    If err.Number <> 0 Then NtryScsOvrhdItm = Space$(Len(sFrmtScsOvrhdItm))
+    If Err.Number <> 0 Then NtryScsOvrhdItm = Space$(Len(sFrmtScsOvrhdItm))
 End Property
 
 Private Property Let NtryScsOvrhdItm(Optional ByRef entry As Collection, ByRef dbl As Double)
@@ -187,7 +187,7 @@ End Property
 Private Property Get NtryScsOvrhdNtry(Optional ByRef entry As Collection) As Double
     On Error Resume Next
     NtryScsOvrhdNtry = entry("SON")
-    If err.Number <> 0 Then NtryScsOvrhdNtry = Space$(Len(sFrmtScsOvrhdItm))
+    If Err.Number <> 0 Then NtryScsOvrhdNtry = Space$(Len(sFrmtScsOvrhdItm))
 End Property
 
 Private Property Let NtryScsOvrhdNtry(Optional ByRef entry As Collection, ByRef dbl As Double)
@@ -205,7 +205,7 @@ End Property
 Private Property Get NtryTcksGrss(Optional ByRef entry As Collection) As Currency
     On Error Resume Next
     NtryTcksGrss = entry("TG")
-    If err.Number <> 0 Then NtryTcksGrss = 0
+    If Err.Number <> 0 Then NtryTcksGrss = 0
 End Property
 
 Private Property Let NtryTcksGrss(Optional ByRef entry As Collection, ByRef cy As Currency)
@@ -215,7 +215,7 @@ End Property
 Private Property Get NtryTcksNt(Optional ByRef entry As Collection) As Currency
     On Error Resume Next
     NtryTcksNt = entry("TN")
-    If err.Number <> 0 Then NtryTcksNt = 0
+    If Err.Number <> 0 Then NtryTcksNt = 0
 End Property
 
 Private Property Let NtryTcksNt(Optional ByRef entry As Collection, ByRef cy As Currency)
@@ -225,7 +225,7 @@ End Property
 Private Property Get NtryTcksOvrhdItm(Optional ByRef entry As Collection) As Currency
     On Error Resume Next
     NtryTcksOvrhdItm = entry("TOI")
-    If err.Number <> 0 Then NtryTcksOvrhdItm = 0
+    If Err.Number <> 0 Then NtryTcksOvrhdItm = 0
 End Property
 
 Private Property Let NtryTcksOvrhdItm(Optional ByRef entry As Collection, ByRef cy As Currency)
@@ -235,7 +235,7 @@ End Property
 Private Property Get NtryTcksOvrhdNtry(Optional ByRef entry As Collection) As Currency
     On Error Resume Next
     NtryTcksOvrhdNtry = entry("TON")
-    If err.Number <> 0 Then NtryTcksOvrhdNtry = 0
+    If Err.Number <> 0 Then NtryTcksOvrhdNtry = 0
 End Property
 
 Private Property Let NtryTcksOvrhdNtry(Optional ByRef entry As Collection, ByRef cy As Currency)
@@ -512,7 +512,7 @@ Public Sub Dsply()
         .MsgText(1) = sTrace:   .MsgMonoSpaced(1) = True
         .MsgLabel(2) = "About overhead, precision, etc.:": .MsgText(2) = DsplyAbout
         .Setup
-        .Show
+        .show
     End With
     
 xt: mTrc.Terminate
@@ -691,9 +691,9 @@ Private Function DsplyArgs(ByVal entry As Collection) As String
     
     On Error Resume Next
     va = ItmArgs(entry)
-    If err.Number <> 0 Then Exit Function
+    If Err.Number <> 0 Then Exit Function
     i = LBound(va)
-    If err.Number <> 0 Then Exit Function
+    If Err.Number <> 0 Then Exit Function
     
     For i = i To UBound(va)
         If DsplyArgs = vbNullString Then
@@ -872,7 +872,7 @@ next_begin_entry:
             .MsgLabel(1) = "The following incosistencies made a trace result display useless/impossible:"
             .MsgText(1) = sTrace:   .MsgMonoSpaced(1) = True
             .Setup
-            .Show
+            .show
         End With
     Else
         DsplyNtryAllCnsstnt = True
@@ -989,8 +989,8 @@ Private Sub ErrMsg( _
     Dim sTitle      As String
     Dim sDetails    As String
     
-    If err_no = 0 Then err_no = err.Number
-    If err_dscrptn = vbNullString Then err_dscrptn = err.Description
+    If err_no = 0 Then err_no = Err.Number
+    If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
     If err_line = 0 Then err_line = Erl
     
     ErrMsgMatter err_source:=err_source, err_no:=err_no, err_line:=err_line, err_dscrptn:=err_dscrptn, msg_title:=sTitle, msg_details:=sDetails

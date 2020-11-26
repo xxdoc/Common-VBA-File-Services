@@ -9,7 +9,7 @@ Declare PtrSafe Function GetKeyState Lib "user32" (ByVal vKey As Integer) As Int
 Const CONCAT = "||"
 Const SHIFT_KEY = 16
 
-Private Sub Regression_Test()
+Public Sub Regression()
 ' ---------------------------------------------------------
 ' All results are asserted and there is no intervention
 ' required for the whole test. When an assertion fails the
@@ -17,100 +17,249 @@ Private Sub Regression_Test()
 ' the called procedure.
 ' An execution trace is displayed for each test procedure.
 ' ---------------------------------------------------------
-    Const PROC = "Test_All"
+    Const PROC = "Regression"
 
     On Error GoTo eh
     
-    Test_FileExists
-
-xt: Exit Sub
+    mErH.BoTP ErrSrc(PROC), mErH.AppErr(1) ' For the very last test on an error condition
+    mTest.Test_01_FileExists_Not
+    mTest.Test_02_FileExists_ByObject
+    mTest.Test_03_FileExists_ByFullName
+    mTest.Test_04_FileExists_ByFullName_WildCard_ExactlyOne
+    mTest.Test_05_FileExists_ByFullName_WildCard_MoreThanOne
+    mTest.Test_06_FileExists_WildCard_MoreThanOne_InSubFolder
+    mTest.Test_07_SelectFile
+    mTest.Test_08_FileToArray
+    mTest.Test_09_FilesDiffer_False
+    mTest.Test_10_FilesDiffer_True
+    Test_99_FileExists_NoFileObject_NoString ' Error AppErr(1) !
     
-eh: ErrMsg ErrSrc(PROC)
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
 End Sub
 
-Public Sub Test_SelectFile()
-Dim fso As File
+Public Sub Test_07_SelectFile()
+    Const PROC = "Test_07_SelectFile"
+    
+    On Error GoTo eh
+    Dim fso As File
 
-    If mFile.SelectFile("", "*.xl*", "Excel File", fso) = True Then
+    mErH.BoP ErrSrc(PROC)
+    If mFile.SelectFile( _
+                        sel_init_path:=ThisWorkbook.Path, _
+                        sel_filters:="*.xl*", _
+                        sel_filter_name:="Excel File", _
+                        sel_title:="Select the (preselected by filtering) file", _
+                        sel_result:=fso _
+                        ) = True Then
         Debug.Assert fso.Path = ThisWorkbook.FullName
     Else
         Debug.Assert fso Is Nothing
     End If
     
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
 End Sub
 
-Private Sub Test_FileExists()
-Const PROC      As String = "Test_FileExists"       ' This procedure's name for the error handling and execution tracking
-Dim wb          As Workbook
-Dim fso         As File
-Dim fsoExists   As File
-Dim cltOfFiles  As Collection
-
+Public Sub Test_02_FileExists_ByObject()
+    Const PROC      As String = "Test_02_FileExists_ByObject"
+    
     On Error GoTo eh
-    BoP ErrSrc(PROC)
+    Dim wb          As Workbook
+    Dim fso         As File
+
+    Set wb = ThisWorkbook
+    With New FileSystemObject
+        Set fso = .GetFile(wb.FullName)
+    End With
+    
+    mErH.BoP ErrSrc(PROC), "xst_file:=", wb.FullName
+    Debug.Assert mFile.Exists(xst_file:=fso) = True
+        
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
+End Sub
+  
+
+Public Sub Test_03_FileExists_ByFullName()
+    Const PROC      As String = "Test_03_FileExists_ByFullName"
+    
+    On Error GoTo eh
+    Dim wb          As Workbook
+    Dim fso         As File
+    Dim fsoExists   As File
+
+    mErH.BoP ErrSrc(PROC)
     Set wb = ThisWorkbook
     
     With New FileSystemObject
         Set fso = .GetFile(wb.FullName)
     End With
-    
-    '~~ 1. File by object (exists)
-    Debug.Assert mFile.Exists(fso) = True
-'    Debug.Assert fsoExists Is fso
-    
-    '~~ 2. File by Fullname (exists)
+      
     Debug.Assert mFile.Exists(fso.Path, fsoExists) = True
     Debug.Assert fsoExists Is fso
-    
-    '~~ 3. File by Fullname with wildcard * (exactly one exists)
-    Debug.Assert mFile.Exists(left(fso.Path, Len(fso.Path) - 1) & "*", , cltOfFiles) = True
-    Debug.Assert cltOfFiles.Count = 1
-    Debug.Assert cltOfFiles.Item(1).Path = fso.Path
-    
-    '~~ 4. File by Fullname with wildcard * (2 such files exist)
-    Debug.Assert mFile.Exists(wb.Path & "\fMsg*", , cltOfFiles) = True
-    Debug.Assert cltOfFiles.Count = 2
-    Debug.Assert cltOfFiles.Item(1).Name = "fMsg.frm"
-    Debug.Assert cltOfFiles.Item(2).Name = "fMsg.frx"
-    
-    '~~ 5. File by Fullname with wildcard * (2 such files exist but in a sub-folder)
-    Debug.Assert mFile.Exists(Replace(wb.Path & "\fMsg*", "\" & Split(wb.Name, ".")(0), vbNullString), , cltOfFiles) = True
-    Debug.Assert cltOfFiles.Count >= 2
-    Debug.Assert cltOfFiles.Item(1).Name = "fMsg.frm"
-    Debug.Assert cltOfFiles.Item(2).Name = "fMsg.frx"
-    
-    '~~ 6. File not exists
-    Debug.Assert mFile.Exists("Test.txt") = False
-
-    '~~ 7. Neither a File object nor a string
-    On Error Resume Next
-    mFile.Exists wb
-    Debug.Assert AppErr(err.Number) = 1
-    On Error GoTo eh
-        
-xt:
-    EoP ErrSrc(PROC)
+            
+xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh:
-    ErrMsg ErrSrc(PROC)
+eh: mErH.ErrMsg ErrSrc(PROC)
+End Sub
+
+Public Sub Test_99_FileExists_NoFileObject_NoString()
+    Const PROC = "Test_99_FileExists_NoFileObject_NoString"
+    
+    On Error GoTo eh
+
+    mErH.BoP ErrSrc(PROC)
+    mFile.Exists ThisWorkbook
+    Debug.Assert mErH.AppErr(1)
+        
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
+End Sub
+
+Public Sub Test_01_FileExists_Not()
+    Const PROC = "Test_01_FileExists_Not"
+    Const NOT_EXIST = "Test.txt"
+    
+    On Error GoTo eh
+
+    mErH.BoP ErrSrc(PROC), "xst_file:=", NOT_EXIST
+        
+    Debug.Assert mFile.Exists(xst_file:="Test.txt") = False
+        
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
+End Sub
+
+Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
+    Const PROC = "Test_04_FileExists_ByFullName_WildCard_ExactlyOne"
+    
+    On Error GoTo eh
+    Dim wb      As Workbook
+    Dim fsoFile As File
+    Dim fso     As New FileSystemObject
+    Dim cll     As Collection
+    Dim sWldCrd As String
+    
+    ' Prepare
+    Set wb = ThisWorkbook
+    Set fsoFile = fso.GetFile(wb.FullName)
+    sWldCrd = left(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
+    
+    ' Test
+    mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
+    Debug.Assert mFile.Exists(xst_file:=sWldCrd, xst_cll:=cll) = True
+    Debug.Assert cll.Count = 1
+    Debug.Assert cll.Item(1).Path = fsoFile.Path
+            
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
+End Sub
+
+Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
+    Const PROC      As String = "Test_06_FileExists_WildCard_MoreThanOne_InSubFolder"       ' This procedure's name for the error handling and execution tracking
+    
+    On Error GoTo eh
+    Dim wb          As Workbook
+    Dim cllFiles    As Collection
+    Dim sWldCrd     As String
+
+    ' Prepare
+    Set wb = ThisWorkbook
+    sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.Name, ".")(0), vbNullString)
+    
+    ' Test
+    mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
+    Debug.Assert mFile.Exists( _
+                              xst_file:=sWldCrd, _
+                              xst_cll:=cllFiles _
+                             ) = True
+    Debug.Assert cllFiles.Count >= 2
+    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
+    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
+            
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
+End Sub
+
+Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
+    Const PROC = "Test_05_FileExists_ByFullName_WildCard_MoreThanOne"
+    
+    On Error GoTo eh
+    Dim wb          As Workbook
+    Dim fso         As File
+    Dim cllFiles    As Collection
+    Dim sWldCrd     As String
+
+    ' Prepare
+    Set wb = ThisWorkbook
+    sWldCrd = wb.Path & "\fMsg*"
+    
+    ' Test
+    mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
+    Debug.Assert mFile.Exists(xst_file:=sWldCrd, xst_cll:=cllFiles) = True
+    Debug.Assert cllFiles.Count = 2
+    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
+    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
+            
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
 End Sub
   
-Public Sub Test_ToArray()
-Const PROC = "Test_ToArray"
-Dim sFile As String
-Dim fl      As File
-Dim a       As Variant
-Dim v       As Variant
-
-    On Error GoTo eh
-    BoP ErrSrc(PROC)
+Public Sub Test_08_FileToArray()
+    Const PROC = "Test_08_FileToArray"
     
-    sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mBasic.bas"
+    On Error GoTo eh
+    Dim sFile   As String
+    Dim fl      As File
+    Dim a       As Variant
+    Dim v       As Variant
+    Dim i       As Long
+    Dim j       As Long
+    Dim k       As Long
+    
+    mErH.BoP ErrSrc(PROC)
+    
+    sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
     With New FileSystemObject
         Set fl = .GetFile(sFile)
     End With
-    a = mFile.ToArray(fl)
+    
+    a = mFile.ToArray(ta_file:=fl)
+    '~~ Count empty records
+    For i = LBound(a) To UBound(a)
+        If Trim$(a(i)) = vbNullString Then j = j + 1
+    Next i
+    Debug.Assert j > 0
+    k = UBound(a) - j - 1 ' k is the expected result of the next step
+    
+    a = mFile.ToArray(ta_file:=fl, ta_exclude_empty_records:=True)
+    '~~ Count empty records
+    j = 0
+    For i = LBound(a) To UBound(a)
+        If Len(Trim$(a(i))) = 0 Then
+            j = j + 1
+        End If
+    Next i
+    Debug.Assert j = 0
+    Debug.Assert UBound(a) = k
     
 #If Debugging Then
     For Each v In a
@@ -118,92 +267,87 @@ Dim v       As Variant
     Next v
 #End If
 
-xt:
-    EoP ErrSrc(PROC)
+xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: ErrMsg ErrSrc(PROC)
+eh: mErH.ErrMsg ErrSrc(PROC)
 End Sub
-
-
-Private Sub ErrMsg( _
-             ByVal err_source As String, _
-    Optional ByVal err_no As Long = 0, _
-    Optional ByVal err_dscrptn As String = vbNullString, _
-    Optional ByVal err_line As Long = 0, _
-    Optional ByVal err_asserted = 0)
-' --------------------------------------------------
-' Note! Because the mTrc trace module is an optional
-'       module of the mErH error handler module it
-'       cannot use the mErH's ErrMsg procedure and
-'       thus uses its own - with the known
-'       disadvantage that the title maybe truncated.
-' --------------------------------------------------
-    Dim sTitle      As String
-    Dim sDetails    As String
+  
+Public Sub Test_09_FilesDiffer_False()
+    Const PROC = "Test_09_FilesDiffer"
     
-    If err_no = 0 Then err_no = err.Number
-    If err_dscrptn = vbNullString Then err_dscrptn = err.Description
-    If err_line = 0 Then err_line = Erl
+    On Error GoTo eh
+    Dim fso     As New FileSystemObject
+    Dim sFile   As String
+    Dim f1      As File
+    Dim f2      As File
+    Dim a       As Variant
+    Dim v       As Variant
+    Dim i       As Long
+    Dim j       As Long
+    Dim k       As Long
+    Dim aDiffs  As Variant
     
-    ErrMsgMatter err_source:=err_source, err_no:=err_no, err_line:=err_line, err_dscrptn:=err_dscrptn, msg_title:=sTitle, msg_details:=sDetails
+    ' Prepare
+    sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
+    Set f1 = fso.GetFile("E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas")
+    Set f2 = fso.GetFile("E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas")
     
-#If Test Then
-    If err_no <> err_asserted _
-    Then MsgBox Prompt:="Error description:" & vbLf & _
-                        err_dscrptn & vbLf & vbLf & _
-                        "Error source/details:" & vbLf & _
-                        sDetails, _
-                buttons:=vbOKOnly, _
-                Title:=sTitle
-#Else
-    MsgBox Prompt:="Error description:" & vbLf & _
-                    err_dscrptn & vbLf & vbLf & _
-                   "Error source/details:" & vbLf & _
-                   sDetails, _
-           buttons:=vbOKOnly, _
-           Title:=sTitle
-#End If
-End Sub
-
-Private Sub ErrMsgMatter(ByVal err_source As String, _
-                         ByVal err_no As Long, _
-                         ByVal err_line As Long, _
-                         ByVal err_dscrptn As String, _
-                Optional ByRef msg_title As String, _
-                Optional ByRef msg_type As String, _
-                Optional ByRef msg_line As String, _
-                Optional ByRef msg_no As Long, _
-                Optional ByRef msg_details As String, _
-                Optional ByRef msg_dscrptn As String, _
-                Optional ByRef msg_info As String)
-' ---------------------------------------------------------------------------------
-' Returns all matter to build a proper error message.
-' msg_line:    at line <err_line>
-' msg_no:      1 to n (an Application error translated back into its origin number)
-' msg_title:   <error type> <error number> in:  <error source>
-' msg_details: <error type> <error number> in <error source> [(at line <err_line>)]
-' msg_dscrptn: the error description
-' msg_info:    any text which follows the description concatenated by a ||
-' ---------------------------------------------------------------------------------
-    If InStr(1, err_source, "DAO") <> 0 _
-    Or InStr(1, err_source, "ODBC Teradata Driver") <> 0 _
-    Or InStr(1, err_source, "ODBC") <> 0 _
-    Or InStr(1, err_source, "Oracle") <> 0 Then
-        msg_type = "Database Error "
-    Else
-      msg_type = IIf(err_no > 0, "VB-Runtime Error ", "Application Error ")
+    ' Test
+    mErH.BoP ErrSrc(PROC), "dif_file1 = ", f1.Name, "dif_file2 = ", f2.Name
+    Debug.Assert mFile.sDiffer(dif_file1:=f1, dif_file2:=f2, dif_ignore_empty_records:=True, dif_lines:=aDiffs) = True
+    
+#If Debugging Then
+    If mBasic.ArrayIsAllocated(aDiffs) Then
+        For i = LBound(aDiffs) To UBound(aDiffs)
+            Debug.Print i & " : '" & aDiffs(i)
+        Next i
     End If
-   
-    msg_line = IIf(err_line <> 0, "at line " & err_line, vbNullString)
-    msg_no = IIf(err_no < 0, err_no - vbObjectError, err_no)
-    msg_title = msg_type & msg_no & " in:  " & err_source
-    msg_details = IIf(err_line <> 0, msg_type & msg_no & " in: " & err_source & " (" & msg_line & ")", msg_type & msg_no & " in " & err_source)
-    msg_dscrptn = IIf(InStr(err_dscrptn, CONCAT) <> 0, Split(err_dscrptn, CONCAT)(0), err_dscrptn)
-    If InStr(err_dscrptn, CONCAT) <> 0 Then msg_info = Split(err_dscrptn, CONCAT)(1) Else msg_info = vbNullString
+#End If
 
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
+End Sub
+
+Public Sub Test_10_FilesDiffer_True()
+    Const PROC = "Test_10_FilesDiffer_True"
+    
+    On Error GoTo eh
+    Dim fso     As New FileSystemObject
+    Dim sFile   As String
+    Dim f1      As File
+    Dim f2      As File
+    Dim a       As Variant
+    Dim v       As Variant
+    Dim i       As Long
+    Dim j       As Long
+    Dim k       As Long
+    Dim aDiffs  As Variant
+    
+    ' Prepare
+    Set f1 = fso.GetFile("E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas")
+    Set f2 = fso.GetFile("E:\Ablage\Excel VBA\DevAndTest\Common\File\mMsg.bas")
+    
+    ' Test
+    mErH.BoP ErrSrc(PROC)
+    Debug.Assert mFile.sDiffer(dif_file1:=f1, dif_file2:=f2, dif_ignore_empty_records:=True) = False
+    
+#If Debugging Then
+    If mBasic.ArrayIsAllocated(aDiffs) Then
+        For i = LBound(aDiffs) To UBound(aDiffs)
+            Debug.Print i & " : '" & aDiffs(i)
+        Next i
+    End If
+#End If
+
+xt: mErH.EoP ErrSrc(PROC)
+    Exit Sub
+    
+eh: mErH.ErrMsg ErrSrc(PROC)
 End Sub
 
 Private Function ErrSrc(ByVal sProc As String) As String
-    ErrSrc = ThisWorkbook.Name & ">mTest" & ">" & sProc
+    ErrSrc = ThisWorkbook.Name & ": mTest." & sProc
 End Function
