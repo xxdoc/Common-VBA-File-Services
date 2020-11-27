@@ -37,7 +37,11 @@ Public Sub Regression()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_07_SelectFile()
@@ -62,7 +66,11 @@ Public Sub Test_07_SelectFile()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_02_FileExists_ByObject()
@@ -83,7 +91,11 @@ Public Sub Test_02_FileExists_ByObject()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
   
 
@@ -108,7 +120,11 @@ Public Sub Test_03_FileExists_ByFullName()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_99_FileExists_NoFileObject_NoString()
@@ -123,7 +139,11 @@ Public Sub Test_99_FileExists_NoFileObject_NoString()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_01_FileExists_Not()
@@ -139,7 +159,11 @@ Public Sub Test_01_FileExists_Not()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
@@ -166,7 +190,11 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
@@ -194,7 +222,11 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
@@ -220,7 +252,11 @@ Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
   
 Public Sub Test_08_FileToArray()
@@ -270,7 +306,11 @@ Public Sub Test_08_FileToArray()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
   
 Public Sub Test_09_FilesDiffer_False()
@@ -308,7 +348,11 @@ Public Sub Test_09_FilesDiffer_False()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Public Sub Test_10_FilesDiffer_True()
@@ -332,10 +376,14 @@ Public Sub Test_10_FilesDiffer_True()
     
     ' Test
     mErH.BoP ErrSrc(PROC)
-    Debug.Assert mFile.sDiffer(dif_file1:=f1, dif_file2:=f2, dif_ignore_empty_records:=True) = False
+    Debug.Assert mFile.sDiffer(dif_file1:=f1, _
+                               dif_file2:=f2, _
+                               dif_ignore_empty_records:=True, _
+                               dif_lines:=aDiffs _
+                              ) = True
     
 #If Debugging Then
-    If mBasic.ArrayIsAllocated(aDiffs) Then
+    If mBasic.ArrayIsAllocated(arr:=aDiffs) Then
         For i = LBound(aDiffs) To UBound(aDiffs)
             Debug.Print i & " : '" & aDiffs(i)
         Next i
@@ -345,7 +393,11 @@ Public Sub Test_10_FilesDiffer_True()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: mErH.ErrMsg ErrSrc(PROC)
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+        Case mErH.ErrMsgDefaultButton: End
+    End Select
 End Sub
 
 Private Function ErrSrc(ByVal sProc As String) As String
