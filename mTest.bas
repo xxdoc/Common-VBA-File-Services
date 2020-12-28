@@ -1,13 +1,9 @@
 Attribute VB_Name = "mTest"
 Option Explicit
 ' ------------------------------------------------------------
-' Standard Module mTest Test of all Existence checks variants
-'                       in module mExists
+' Standard Module mTest
+' Test of all services of the module.
 ' -----------------------------------------------------------
-'Declare API
-Declare PtrSafe Function GetKeyState Lib "user32" (ByVal vKey As Integer) As Integer
-Const CONCAT = "||"
-Const SHIFT_KEY = 16
 
 Public Sub Regression()
 ' ---------------------------------------------------------
@@ -29,7 +25,7 @@ Public Sub Regression()
     mTest.Test_05_FileExists_ByFullName_WildCard_MoreThanOne
     mTest.Test_06_FileExists_WildCard_MoreThanOne_InSubFolder
     mTest.Test_07_SelectFile
-    mTest.Test_08_FileToArray
+    mTest.Test_08_Arry_Let
     mTest.Test_09_FilesDiffer_False
     mTest.Test_10_FilesDiffer_True
     Test_99_FileExists_NoFileObject_NoString ' Error AppErr(1) !
@@ -40,7 +36,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -69,7 +64,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -94,7 +88,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
   
@@ -123,7 +116,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -142,7 +134,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -162,7 +153,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -193,7 +183,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -225,7 +214,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -255,12 +243,11 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
   
-Public Sub Test_08_FileToArray()
-    Const PROC = "Test_08_FileToArray"
+Public Sub Test_08_Arry_Let()
+    Const PROC = "Test_08_Arry_Let"
     
     On Error GoTo eh
     Dim sFile   As String
@@ -278,7 +265,7 @@ Public Sub Test_08_FileToArray()
         Set fl = .GetFile(sFile)
     End With
     
-    a = mFile.ToArray(ta_file:=fl)
+    a = mFile.Arry(fa_file_full_name:=fl)
     '~~ Count empty records
     For i = LBound(a) To UBound(a)
         If Trim$(a(i)) = vbNullString Then j = j + 1
@@ -286,7 +273,7 @@ Public Sub Test_08_FileToArray()
     Debug.Assert j > 0
     k = UBound(a) - j - 1 ' k is the expected result of the next step
     
-    a = mFile.ToArray(ta_file:=fl, ta_exclude_empty_records:=True)
+    a = mFile.Arry(fa_file_full_name:=fl, fa_exclude_empty_records:=True)
     '~~ Count empty records
     j = 0
     For i = LBound(a) To UBound(a)
@@ -309,7 +296,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
   
@@ -351,7 +337,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -396,7 +381,34 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
+    End Select
+End Sub
+
+Public Sub Test_11_Txt()
+    Const PROC = "Test_11_Txt"
+    
+    On Error GoTo eh
+    Dim sFl     As String
+    Dim sTest   As String
+    Dim sResult As String
+    Dim a()     As String
+    Dim sSplit  As String
+    
+    sFl = "E:\Ablage\Excel VBA\DevAndTest\Common\CompManDev\CompMan.cfg"
+    sTest = "My string"
+    
+    mFile.Txt(tx_file_full_name:=sFl _
+            , tx_append:=False _
+             ) = sTest
+    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
+    a = Split(sResult, sSplit)
+    Debug.Assert a(0) = sTest
+
+xt: Exit Sub
+
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
     End Select
 End Sub
 

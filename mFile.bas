@@ -23,6 +23,142 @@ Option Private Module
 ' -----------------------------------------------------------------------------------
 Private Const CONCAT = "||"
 
+                        
+Public Property Get Arry( _
+           Optional ByVal fa_file_full_name As String, _
+           Optional ByVal fa_exclude_empty_records As Boolean = False) As Variant
+' ------------------------------------------------------------------------------------
+' Returns the content of the file (vFile) - which may be provided as file object or
+' full file name - as array by considering any kind of line break characters.
+' ------------------------------------------------------------------------------------
+    Const PROC  As String = "Arry"
+    
+    On Error GoTo eh
+    Dim ts      As TextStream
+    Dim a       As Variant
+    Dim a1()    As String
+    Dim sSplit  As String
+    Dim fso     As File
+    Dim sFile   As String
+    Dim i       As Long
+    Dim j       As Long
+    Dim k       As Long
+    
+    If Not Exists(fa_file_full_name, fso) _
+    Then Err.Raise AppErr(1), ErrSrc(PROC), "The file object (vFile) does not exist!"
+    
+    '~~ Unload file into a test stream
+    With New FileSystemObject
+        Set ts = .OpenTextFile(fso.Path, 1)
+        With ts
+            On Error Resume Next ' may be empty
+            sFile = .ReadAll
+            .Close
+        End With
+    End With
+    
+    If sFile = vbNullString Then GoTo xt
+    
+    '~~ Get the kind of line break used
+    If InStr(sFile, vbCr) <> 0 Then sSplit = vbCr
+    If InStr(sFile, vbLf) <> 0 Then sSplit = sSplit & vbLf
+    
+    '~~ Test stream to array
+    a = Split(sFile, sSplit)
+    
+    '~~ Remove any leading or trailing empty items
+    mBasic.ArrayTrimm a
+    
+    If Not fa_exclude_empty_records Then
+        Arry = a
+    Else
+        '~~ Count empty records
+        j = 0
+        For i = LBound(a) To UBound(a)
+            If Len(Trim$(a(i))) = 0 Then j = j + 1
+        Next i
+        j = UBound(a) - j
+        ReDim a1(j - 1)
+        j = 0
+        For i = LBound(a) To UBound(a)
+            If Len(Trim$(a(i))) > 0 Then
+                a1(j) = a(i)
+                j = j + 1
+            End If
+        Next i
+        Arry = a1
+    End If
+    
+xt: Exit Property
+    
+eh: ErrMsg ErrSrc(PROC)
+End Property
+
+Public Property Let Arry( _
+               Optional ByVal fa_file_full_name As String, _
+               Optional ByVal fa_exclude_empty_records As Boolean = False, _
+                        ByVal fa_array As Variant)
+' --------------------------------------------------------------------------
+' Write array of strings (fa_array) to file (fa_file).
+' --------------------------------------------------------------------------
+
+End Property
+
+Public Function AppErr(ByVal err_no As Long) As Long
+' -----------------------------------------------------------------
+' Used with Err.Raise AppErr(<l>).
+' When the error number <l> is > 0 it is considered an "Application
+' Error Number and vbObjectErrror is added to it into a negative
+' number in order not to confuse with a VB runtime error.
+' When the error number <l> is negative it is considered an
+' Application Error and vbObjectError is added to convert it back
+' into its origin positive number.
+' ------------------------------------------------------------------
+    If err_no < 0 Then
+        AppErr = err_no - vbObjectError
+    Else
+        AppErr = vbObjectError + err_no
+    End If
+End Function
+
+Public Sub Delete(ByVal v As Variant)
+
+    Dim fl  As File
+
+    With New FileSystemObject
+        If TypeName(v) = "File" Then
+            Set fl = v
+            .DeleteFile fl.Path
+        ElseIf TypeName(v) = "String" Then
+            If .FileExists(v) Then
+                .DeleteFile v
+            End If
+        End If
+    End With
+    
+End Sub
+
+Private Sub ErrMsg( _
+             ByVal err_source As String, _
+    Optional ByVal err_no As Long = 0, _
+    Optional ByVal err_dscrptn As String = vbNullString)
+' ------------------------------------------------------
+' This Common Component does not have its own error
+' handling. Instead it passes on any error to the
+' caller's error handling.
+' ------------------------------------------------------
+    
+    If err_no = 0 Then err_no = Err.Number
+    If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
+
+    Err.Raise Number:=err_no, Source:=err_source, Description:=err_dscrptn
+
+End Sub
+
+Private Function ErrSrc(ByVal sProc As String) As String
+    ErrSrc = ThisWorkbook.Name & ": mFile." & sProc
+End Function
+
 Public Function Exists(ByVal xst_file As Variant, _
               Optional ByRef xst_fso As File = Nothing, _
               Optional ByRef xst_cll As Collection = Nothing) As Boolean
@@ -50,17 +186,17 @@ Public Function Exists(ByVal xst_file As Variant, _
     Set xst_cll = New Collection
 
     If TypeName(xst_file) <> "File" And TypeName(xst_file) <> "String" _
-    Then err.Raise AppErr(1), ErrSrc(PROC), "The File (parameter xst_file) for the File's existence check is neither a full path/file name nor a file object!"
+    Then Err.Raise AppErr(1), ErrSrc(PROC), "The File (parameter xst_file) for the File's existence check is neither a full path/file name nor a file object!"
     If Not TypeName(xst_fso) = "Nothing" And Not TypeName(xst_fso) = "File" _
-    Then err.Raise AppErr(2), ErrSrc(PROC), "The provided return parameter (xst_fso) is not a File type!"
+    Then Err.Raise AppErr(2), ErrSrc(PROC), "The provided return parameter (xst_fso) is not a File type!"
     If Not TypeName(xst_cll) = "Nothing" And Not TypeName(xst_cll) = "Collection" _
-    Then err.Raise AppErr(3), ErrSrc(PROC), "The provided return parameter (xst_cll) is not a Collection type!"
+    Then Err.Raise AppErr(3), ErrSrc(PROC), "The provided return parameter (xst_cll) is not a Collection type!"
 
     If TypeOf xst_file Is File Then
         With New FileSystemObject
             On Error Resume Next
             sTest = xst_file.Name
-            Exists = err.Number = 0
+            Exists = Err.Number = 0
             If Exists Then
                 '~~ Return the existing file as File object
                 Set xst_fso = .GetFile(xst_file.Path)
@@ -109,131 +245,48 @@ xt: Exit Function
 eh: ErrMsg ErrSrc(PROC)
 End Function
 
+Public Function Extension(ByVal vFile As Variant)
+
+    With New FileSystemObject
+        If TypeName(vFile) = "File" Then
+            Extension = .GetExtensionName(vFile.Path)
+        Else
+            Extension = .GetExtensionName(vFile)
+        End If
+    End With
+
+End Function
+
 Public Function GetFile(ByVal gf_path As String) As File
     With New FileSystemObject
         Set GetFile = .GetFile(gf_path)
     End With
 End Function
 
-Public Function ToArray(ByVal ta_file As Variant, _
-               Optional ByVal ta_exclude_empty_records As Boolean = False) As String()
-' ------------------------------------------------------------------------------------
-' Returns the content of the file (vFile) - which may be provided as file object or
-' full file name - as array by considering any kind of line break characters.
-' ------------------------------------------------------------------------------------
-    Const PROC  As String = "ToArray"
-    
-    On Error GoTo eh
-    Dim ts      As TextStream
-    Dim a       As Variant
-    Dim a1()    As String
-    Dim sSplit  As String
-    Dim fso     As File
-    Dim sFile   As String
-    Dim i       As Long
-    Dim j       As Long
-    Dim k       As Long
-    
-    If Not Exists(ta_file, fso) _
-    Then err.Raise AppErr(1), ErrSrc(PROC), "The file object (vFile) does not exist!"
-    
-    '~~ Unload file into a test stream
-    With New FileSystemObject
-        Set ts = .OpenTextFile(fso.Path, 1)
-        With ts
-            On Error Resume Next ' may be empty
-            sFile = .ReadAll
-            .Close
-        End With
-    End With
-    
-    If sFile = vbNullString Then GoTo xt
-    
-    '~~ Get the kind of line break used
-    If InStr(sFile, vbCr) <> 0 Then sSplit = vbCr
-    If InStr(sFile, vbLf) <> 0 Then sSplit = sSplit & vbLf
-    
-    '~~ Test stream to array
-    a = Split(sFile, sSplit)
-    
-    '~~ Remove any leading or trailing empty items
-    mBasic.ArrayTrimm a
-    
-    If Not ta_exclude_empty_records Then
-        ToArray = a
-    Else
-        '~~ Count empty records
-        j = 0
-        For i = LBound(a) To UBound(a)
-            If Len(Trim$(a(i))) = 0 Then j = j + 1
-        Next i
-        j = UBound(a) - j
-        ReDim a1(j - 1)
-        j = 0
-        For i = LBound(a) To UBound(a)
-            If Len(Trim$(a(i))) > 0 Then
-                a1(j) = a(i)
-                j = j + 1
-            End If
-        Next i
-        ToArray = a1
-    End If
-    
-xt: Exit Function
-    
-eh: ErrMsg ErrSrc(PROC)
-End Function
+Public Function sDiffer( _
+                  ByVal dif_file1 As File, _
+                  ByVal dif_file2 As File, _
+         Optional ByVal dif_stop_after As Long = 1, _
+         Optional ByVal dif_ignore_empty_records As Boolean = False, _
+         Optional ByRef dif_lines As Variant) As Boolean
+' -----------------------------------------------------------------------------
+' Returns TRUE when the content of file (dif_file1) differs from the content in
+' file (dif_file2). The comparison stops after (dif_stop_after) detected
+' differences. The detected different lines are optionally returned (vResult).
+' ------------------------------------------------------------------------------
 
-Public Function ToDict(ByVal td_file As Variant) As Dictionary
-' ----------------------------------------------------------
-' Returns the content of the file (td_file) - which may be
-' provided as file object or full file name - as Dictionary
-' by considering any kind of line break characters.
-' ---------------------------------------------------------
-    Const PROC  As String = "ToDict"
+    Dim a1      As Variant
+    Dim a2      As Variant
+    Dim vLines  As Variant
+
+    a1 = mFile.Arry(fa_file_full_name:=dif_file1, fa_exclude_empty_records:=dif_ignore_empty_records)
+    a2 = mFile.Arry(fa_file_full_name:=dif_file2, fa_exclude_empty_records:=dif_ignore_empty_records)
+    vLines = mBasic.ArrayCompare(ac_a1:=a1, ac_a2:=a2, ac_stop_after:=dif_stop_after)
+    If mBasic.ArrayIsAllocated(arr:=vLines) Then
+        sDiffer = True
+    End If
+    dif_lines = vLines
     
-    On Error GoTo eh
-    Dim ts      As TextStream
-    Dim a       As Variant
-    Dim dct     As New Dictionary
-    Dim sSplit  As String
-    Dim fso     As File
-    Dim sFile   As String
-    Dim i       As Long
-    
-    If Not Exists(td_file, fso) _
-    Then err.Raise AppErr(1), ErrSrc(PROC), "The file object (td_file) does not exist!"
-    
-    '~~ Unload file into a test stream
-    With New FileSystemObject
-        Set ts = .OpenTextFile(fso.Path, 1)
-        With ts
-            On Error Resume Next ' may be empty
-            sFile = .ReadAll
-            .Close
-        End With
-    End With
-    
-    If sFile = vbNullString Then GoTo xt
-    
-    '~~ Get the kind of line break used
-    If InStr(sFile, vbCr) <> 0 Then sSplit = vbCr
-    If InStr(sFile, vbLf) <> 0 Then sSplit = sSplit & vbLf
-    
-    '~~ Test stream to array
-    a = Split(sFile, sSplit)
-    
-    '~~ Remove any leading or trailing empty items
-    mBasic.ArrayTrimm a
-    
-    For i = LBound(a) To UBound(a)
-        dct.Add i + 1, a(i)
-    Next i
-        
-xt: Set ToDict = dct
-    Exit Function
-    
-eh: ErrMsg ErrSrc(PROC)
 End Function
 
 Public Function SelectFile( _
@@ -274,95 +327,123 @@ Public Function SelectFile( _
 
 End Function
 
-Public Function sDiffer( _
-                  ByVal dif_file1 As File, _
-                  ByVal dif_file2 As File, _
-         Optional ByVal dif_stop_after As Long = 1, _
-         Optional ByVal dif_ignore_empty_records As Boolean = False, _
-         Optional ByRef dif_lines As Variant) As Boolean
-' -----------------------------------------------------------------------------
-' Returns TRUE when the content of file (dif_file1) differs from the content in
-' file (dif_file2). The comparison stops after (dif_stop_after) detected
-' differences. The detected different lines are optionally returned (vResult).
-' ------------------------------------------------------------------------------
-
-    Dim a1      As Variant
-    Dim a2      As Variant
-    Dim vLines  As Variant
-
-    a1 = mFile.ToArray(ta_file:=dif_file1, ta_exclude_empty_records:=dif_ignore_empty_records)
-    a2 = mFile.ToArray(ta_file:=dif_file2, ta_exclude_empty_records:=dif_ignore_empty_records)
-    vLines = mBasic.ArrayCompare(ac_a1:=a1, ac_a2:=a2, ac_stop_after:=dif_stop_after)
-    If mBasic.ArrayIsAllocated(arr:=vLines) Then
-        sDiffer = True
-    End If
-    dif_lines = vLines
+Public Property Get Txt( _
+         Optional ByVal tx_file_full_name As String, _
+         Optional ByVal tx_append As Boolean = True, _
+         Optional ByRef tx_split As String) As String
+' ----------------------------------------------------------
+' Returns the content of the text file (tx_file_full_name)
+' as string plus the line split character/string (tx_split).
+' ----------------------------------------------------------
+    Const PROC = "TxtGet"
     
-End Function
-
-Public Function AppErr(ByVal err_no As Long) As Long
-' -----------------------------------------------------------------
-' Used with Err.Raise AppErr(<l>).
-' When the error number <l> is > 0 it is considered an "Application
-' Error Number and vbObjectErrror is added to it into a negative
-' number in order not to confuse with a VB runtime error.
-' When the error number <l> is negative it is considered an
-' Application Error and vbObjectError is added to convert it back
-' into its origin positive number.
-' ------------------------------------------------------------------
-    If err_no < 0 Then
-        AppErr = err_no - vbObjectError
-    Else
-        AppErr = vbObjectError + err_no
-    End If
-End Function
-
-Public Sub Delete(ByVal v As Variant)
-
-    Dim fl  As File
-
-    With New FileSystemObject
-        If TypeName(v) = "File" Then
-            Set fl = v
-            .DeleteFile fl.Path
-        ElseIf TypeName(v) = "String" Then
-            If .FileExists(v) Then
-                .DeleteFile v
-            End If
-        End If
-    End With
+    On Error GoTo eh
+    Dim fso As New FileSystemObject
+    Dim ts  As TextStream
     
-End Sub
+    If Not fso.FileExists(tx_file_full_name) _
+    Then Err.Raise AppErr(1), ErrSrc(PROC), "The file '" & tx_file_full_name & "' does not exist!"
 
-Public Function Extension(ByVal vFile As Variant)
+    Set ts = fso.OpenTextFile(Filename:=tx_file_full_name, IOMode:=ForReading)
+    Txt = ts.ReadAll
+    If InStr(Txt, vbCrLf) <> 0 Then
+        tx_split = vbCrLf
+    ElseIf InStr(Txt, vbCr) <> 0 Then
+        tx_split = vbCr
+    ElseIf InStr(Txt, vbLf) <> 0 Then
+        tx_split = vbLf
+    End If
+xt: Exit Property
 
-    With New FileSystemObject
-        If TypeName(vFile) = "File" Then
-            Extension = .GetExtensionName(vFile.Path)
+eh: ErrMsg ErrSrc(PROC)
+End Property
+
+Public Property Let Txt( _
+         Optional ByVal tx_file_full_name As String, _
+         Optional ByVal tx_append As Boolean = True, _
+         Optional ByRef tx_split As String, _
+                  ByVal tx_string As String)
+' -------------------------------------------------------
+' Write the test string (tx_string) to the file
+' (tx_file_full_name) optionally appended.
+' -------------------------------------------------------
+    Const PROC = "TxtLet"
+    
+    On Error GoTo eh
+    Dim fso As New FileSystemObject
+    Dim ts  As TextStream
+    
+    With fso
+        If tx_append Then
+            If Not .FileExists(tx_file_full_name) Then .CreateTextFile tx_file_full_name
+            Set ts = .OpenTextFile(tx_file_full_name, IOMode:=ForAppending)
         Else
-            Extension = .GetExtensionName(vFile)
+            If .FileExists(tx_file_full_name) Then .DeleteFile (tx_file_full_name)
+            .CreateTextFile tx_file_full_name
+            Set ts = .OpenTextFile(Filename:=tx_file_full_name _
+                                 , IOMode:=ForWriting _
+                                  )
         End If
     End With
+    ts.WriteLine tx_string
 
-End Function
-
-Private Sub ErrMsg( _
-             ByVal err_source As String, _
-    Optional ByVal err_no As Long = 0, _
-    Optional ByVal err_dscrptn As String = vbNullString)
-' ------------------------------------------------------
-' This Common Component does not have its own error
-' handling. Instead it passes on any error to the
-' caller's error handling.
-' ------------------------------------------------------
+xt: ts.Close
+    Set fso = Nothing
+    Set ts = Nothing
+    Exit Property
     
-    If err_no = 0 Then err_no = err.Number
-    If err_dscrptn = vbNullString Then err_dscrptn = err.Description
+eh: ErrMsg ErrSrc(PROC)
+End Property
 
-    err.Raise Number:=err_no, Source:=err_source, Description:=err_dscrptn
-
-End Sub
-
-Private Function ErrSrc(ByVal sProc As String) As String
-    ErrSrc = ThisWorkbook.Name & ": mFile." & sProc
+Public Function ToDict(ByVal td_file As Variant) As Dictionary
+' ----------------------------------------------------------
+' Returns the content of the file (td_file) - which may be
+' provided as file object or full file name - as Dictionary
+' by considering any kind of line break characters.
+' ---------------------------------------------------------
+    Const PROC  As String = "ToDict"
+    
+    On Error GoTo eh
+    Dim ts      As TextStream
+    Dim a       As Variant
+    Dim dct     As New Dictionary
+    Dim sSplit  As String
+    Dim fso     As File
+    Dim sFile   As String
+    Dim i       As Long
+    
+    If Not Exists(td_file, fso) _
+    Then Err.Raise AppErr(1), ErrSrc(PROC), "The file object (td_file) does not exist!"
+    
+    '~~ Unload file into a test stream
+    With New FileSystemObject
+        Set ts = .OpenTextFile(fso.Path, 1)
+        With ts
+            On Error Resume Next ' may be empty
+            sFile = .ReadAll
+            .Close
+        End With
+    End With
+    
+    If sFile = vbNullString Then GoTo xt
+    
+    '~~ Get the kind of line break used
+    If InStr(sFile, vbCr) <> 0 Then sSplit = vbCr
+    If InStr(sFile, vbLf) <> 0 Then sSplit = sSplit & vbLf
+    
+    '~~ Test stream to array
+    a = Split(sFile, sSplit)
+    
+    '~~ Remove any leading or trailing empty items
+    mBasic.ArrayTrimm a
+    
+    For i = LBound(a) To UBound(a)
+        dct.Add i + 1, a(i)
+    Next i
+        
+xt: Set ToDict = dct
+    Exit Function
+    
+eh: ErrMsg ErrSrc(PROC)
 End Function
+
