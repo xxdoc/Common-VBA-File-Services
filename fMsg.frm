@@ -12,8 +12,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
 Option Explicit
 ' -------------------------------------------------------------------------------
 ' UserForm fMsg
@@ -1610,7 +1608,7 @@ Private Sub SetupMsgSectionMonoSpaced(ByVal section As Long, _
         .Font.name = sMonoSpacedFontName
         .Font.Size = siMonoSpacedFontSize
         .AutoSize = True
-        .Value = text
+        .value = text
         .AutoSize = False
         .SelStart = 0
         .Left = siHmarginFrames
@@ -1684,7 +1682,7 @@ Private Sub SetupMsgSectionPropSpaced(ByVal section As Long, _
         .AutoSize = True
         .WordWrap = True
         .width = frText.width - siHmarginFrames
-        .Value = text
+        .value = text
         .SelStart = 0
         .Left = HSPACE_LEFT
         frText.width = .Left + .width + siHmarginFrames

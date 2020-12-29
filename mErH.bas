@@ -34,7 +34,9 @@ Option Private Module
 '
 ' W. Rauschenberger, Berlin, Nov 2020
 ' -----------------------------------------------------------------------------------------------
+
 Public Const CONCAT         As String = "||"
+
 Private cllErrPath          As Collection
 Private cllErrorPath        As Collection   ' managed by ErrPath... procedures exclusively
 Private dctStck             As Dictionary
@@ -538,6 +540,9 @@ Public Function ErrMsg( _
     End If
     
 xt:
+#If ExecTrace Then
+'    mTrc.Continue
+#End If
 End Function
 
 Private Sub ErrMsgMatter(ByVal err_source As String, _
@@ -603,10 +608,10 @@ Private Function ErrPathErrMsg(ByVal msg_details As String, _
     If Not ErrPathIsEmpty Then
         '~~ When the error path is not empty and not only contains the error source procedure
         For i = cllErrorPath.Count To 1 Step -1
-            s = cllErrorPath.Item(i)
+            s = cllErrorPath.TrcEntryItem(i)
             If i = cllErrorPath.Count _
             Then ErrPathErrMsg = s _
-            Else ErrPathErrMsg = ErrPathErrMsg & vbLf & Space(j * 2) & "|_" & s
+            Else ErrPathErrMsg = ErrPathErrMsg & vbLf & Space$(j * 2) & "|_" & s
             j = j + 1
         Next i
     Else
@@ -614,7 +619,7 @@ Private Function ErrPathErrMsg(ByVal msg_details As String, _
         If Not StckIsEmpty Then
             For i = 0 To dctStck.Count - 1
                 If ErrPathErrMsg <> vbNullString Then
-                   ErrPathErrMsg = ErrPathErrMsg & vbLf & Space((i - 1) * 2) & "|_" & dctStck.Items()(i)
+                   ErrPathErrMsg = ErrPathErrMsg & vbLf & Space$((i - 1) * 2) & "|_" & dctStck.Items()(i)
                 Else
                    ErrPathErrMsg = dctStck.Items()(i)
                 End If
@@ -644,14 +649,6 @@ End Function
 
 Private Function ErrSrc(ByVal sProc As String) As String
     ErrSrc = "mErH." & sProc
-End Function
-
-Public Function Space(ByVal l As Long) As String
-' --------------------------------------------------
-' Unifies the VB differences SPACE$ and Space$ which
-' lead to code diferences where there aren't any.
-' --------------------------------------------------
-    Space = VBA.Space$(l)
 End Function
 
 Private Function StckBottom() As String
