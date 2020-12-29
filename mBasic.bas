@@ -114,7 +114,7 @@ End Function
 
 Public Function AppIsInstalled(ByVal sApp As String) As Boolean
 Dim i As Long: i = 1
-    Do Until left(Environ$(i), 5) = "Path="
+    Do Until Left(Environ$(i), 5) = "Path="
         i = i + 1
     Loop
     AppIsInstalled = InStr(Environ$(i), sApp) <> 0
@@ -338,11 +338,11 @@ Dim rTarget As Range
     If bOneCol Then
         '~~ One column, n rows
         Set rTarget = r.Cells(1, 1).Resize(UBound(vArr), 1)
-        rTarget.value = Application.Transpose(vArr)
+        rTarget.Value = Application.Transpose(vArr)
     Else
         '~~ One column, n rows
         Set rTarget = r.Cells(1, 1).Resize(1, UBound(vArr))
-        rTarget.value = vArr
+        rTarget.Value = vArr
     End If
     
 End Sub
@@ -447,7 +447,7 @@ Dim ia  As Long
 End Function
 
 Private Function ErrSrc(ByVal sProc As String) As String
-    ErrSrc = ThisWorkbook.Name & " mBasic." & sProc
+    ErrSrc = ThisWorkbook.name & " mBasic." & sProc
 End Function
 
 Public Function IsCvName(ByVal v As Variant) As Boolean
