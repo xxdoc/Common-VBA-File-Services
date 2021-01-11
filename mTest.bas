@@ -44,7 +44,7 @@ Public Sub Test_07_SelectFile()
     Const PROC = "Test_07_SelectFile"
     
     On Error GoTo eh
-    Dim fso As File
+    Dim fso As FILE
 
     mErH.BoP ErrSrc(PROC)
     If mFile.SelectFile( _
@@ -73,7 +73,7 @@ Public Sub Test_02_FileExists_ByObject()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As File
+    Dim fso         As FILE
 
     Set wb = ThisWorkbook
     With New FileSystemObject
@@ -98,8 +98,8 @@ Public Sub Test_03_FileExists_ByFullName()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As File
-    Dim fsoExists   As File
+    Dim fso         As FILE
+    Dim fsoExists   As FILE
 
     mErH.BoP ErrSrc(PROC)
     Set wb = ThisWorkbook
@@ -162,7 +162,7 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     
     On Error GoTo eh
     Dim wb      As Workbook
-    Dim fsoFile As File
+    Dim fsoFile As FILE
     Dim fso     As New FileSystemObject
     Dim cll     As Collection
     Dim sWldCrd As String
@@ -170,7 +170,7 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     ' Prepare
     Set wb = ThisWorkbook
     Set fsoFile = fso.GetFile(wb.FullName)
-    sWldCrd = Left(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
+    sWldCrd = left(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
     
     ' Test
     mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
@@ -303,8 +303,8 @@ Public Sub Test_09_FilesDiffer_False()
     On Error GoTo eh
     Dim fso     As New FileSystemObject
     Dim sFile   As String
-    Dim f1      As File
-    Dim f2      As File
+    Dim f1      As FILE
+    Dim f2      As FILE
     Dim i       As Long
     Dim aDiffs  As Variant
     
@@ -339,8 +339,8 @@ Public Sub Test_10_FilesDiffer_True()
     
     On Error GoTo eh
     Dim fso     As New FileSystemObject
-    Dim f1      As File
-    Dim f2      As File
+    Dim f1      As FILE
+    Dim f2      As FILE
     Dim i       As Long
     Dim aDiffs  As Variant
     
@@ -384,15 +384,24 @@ Public Sub Test_11_Txt()
     Dim sSplit  As String
     Dim fso     As New FileSystemObject
     
-    sFl = mFile.Temp()
-    sTest = "My string"
+'    sFl = mFile.Temp()
+'    sTest = "My string"
+'
+'    mFile.Txt(tx_file_full_name:=sFl _
+'            , tx_append:=False _
+'             ) = sTest
+'    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
+'    a = Split(sResult, sSplit)
+'    Debug.Assert a(0) = sTest
+'    If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
     
+    sFl = mFile.Temp()
+    sTest = ""
     mFile.Txt(tx_file_full_name:=sFl _
             , tx_append:=False _
-             ) = sTest
+             ) = ""
     sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
-    a = Split(sResult, sSplit)
-    Debug.Assert a(0) = sTest
+    Debug.Assert sResult = vbNullString
 
 xt: If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
     Set fso = Nothing
