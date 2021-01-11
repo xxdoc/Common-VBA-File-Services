@@ -1,13 +1,9 @@
 Attribute VB_Name = "mTest"
 Option Explicit
 ' ------------------------------------------------------------
-' Standard Module mTest Test of all Existence checks variants
-'                       in module mExists
+' Standard Module mTest
+' Test of all services of the module.
 ' -----------------------------------------------------------
-'Declare API
-Declare PtrSafe Function GetKeyState Lib "user32" (ByVal vKey As Integer) As Integer
-Const CONCAT = "||"
-Const SHIFT_KEY = 16
 
 Public Sub Regression()
 ' ---------------------------------------------------------
@@ -29,9 +25,10 @@ Public Sub Regression()
     mTest.Test_05_FileExists_ByFullName_WildCard_MoreThanOne
     mTest.Test_06_FileExists_WildCard_MoreThanOne_InSubFolder
     mTest.Test_07_SelectFile
-    mTest.Test_08_FileToArray
+    mTest.Test_08_Arry_Get
     mTest.Test_09_FilesDiffer_False
     mTest.Test_10_FilesDiffer_True
+    mTest.Test_11_Txt
     Test_99_FileExists_NoFileObject_NoString ' Error AppErr(1) !
     
 xt: mErH.EoP ErrSrc(PROC)
@@ -40,7 +37,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -48,7 +44,7 @@ Public Sub Test_07_SelectFile()
     Const PROC = "Test_07_SelectFile"
     
     On Error GoTo eh
-    Dim fso As File
+    Dim fso As FILE
 
     mErH.BoP ErrSrc(PROC)
     If mFile.SelectFile( _
@@ -69,7 +65,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -78,7 +73,7 @@ Public Sub Test_02_FileExists_ByObject()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As File
+    Dim fso         As FILE
 
     Set wb = ThisWorkbook
     With New FileSystemObject
@@ -94,7 +89,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
   
@@ -104,8 +98,8 @@ Public Sub Test_03_FileExists_ByFullName()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As File
-    Dim fsoExists   As File
+    Dim fso         As FILE
+    Dim fsoExists   As FILE
 
     mErH.BoP ErrSrc(PROC)
     Set wb = ThisWorkbook
@@ -123,7 +117,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -142,7 +135,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -162,7 +154,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -171,7 +162,7 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     
     On Error GoTo eh
     Dim wb      As Workbook
-    Dim fsoFile As File
+    Dim fsoFile As FILE
     Dim fso     As New FileSystemObject
     Dim cll     As Collection
     Dim sWldCrd As String
@@ -193,7 +184,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -207,7 +197,7 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
 
     ' Prepare
     Set wb = ThisWorkbook
-    sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.Name, ".")(0), vbNullString)
+    sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.name, ".")(0), vbNullString)
     
     ' Test
     mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
@@ -216,8 +206,8 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
                               xst_cll:=cllFiles _
                              ) = True
     Debug.Assert cllFiles.Count >= 2
-    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
-    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
+    Debug.Assert cllFiles.Item(1).name = "fMsg.frm"
+    Debug.Assert cllFiles.Item(2).name = "fMsg.frx"
             
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
@@ -225,7 +215,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -234,7 +223,6 @@ Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As File
     Dim cllFiles    As Collection
     Dim sWldCrd     As String
 
@@ -246,8 +234,8 @@ Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
     mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
     Debug.Assert mFile.Exists(xst_file:=sWldCrd, xst_cll:=cllFiles) = True
     Debug.Assert cllFiles.Count = 2
-    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
-    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
+    Debug.Assert cllFiles.Item(1).name = "fMsg.frm"
+    Debug.Assert cllFiles.Item(2).name = "fMsg.frx"
             
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
@@ -255,30 +243,26 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
   
-Public Sub Test_08_FileToArray()
-    Const PROC = "Test_08_FileToArray"
+Public Sub Test_08_Arry_Get()
+    Const PROC = "Test_08_Arry_Get"
     
     On Error GoTo eh
     Dim sFile   As String
-    Dim fl      As File
     Dim a       As Variant
     Dim v       As Variant
     Dim i       As Long
     Dim j       As Long
     Dim k       As Long
+    Dim fso     As New FileSystemObject
     
     mErH.BoP ErrSrc(PROC)
     
     sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
-    With New FileSystemObject
-        Set fl = .GetFile(sFile)
-    End With
     
-    a = mFile.ToArray(ta_file:=fl)
+    a = mFile.Arry(fa_file_full_name:=fso.GetFile(sFile))
     '~~ Count empty records
     For i = LBound(a) To UBound(a)
         If Trim$(a(i)) = vbNullString Then j = j + 1
@@ -286,7 +270,7 @@ Public Sub Test_08_FileToArray()
     Debug.Assert j > 0
     k = UBound(a) - j - 1 ' k is the expected result of the next step
     
-    a = mFile.ToArray(ta_file:=fl, ta_exclude_empty_records:=True)
+    a = mFile.Arry(fa_file_full_name:=fso.GetFile(sFile), fa_exclude_empty_records:=True)
     '~~ Count empty records
     j = 0
     For i = LBound(a) To UBound(a)
@@ -303,13 +287,13 @@ Public Sub Test_08_FileToArray()
     Next v
 #End If
 
-xt: mErH.EoP ErrSrc(PROC)
+xt: Set fso = Nothing
+    mErH.EoP ErrSrc(PROC)
     Exit Sub
     
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
   
@@ -319,13 +303,9 @@ Public Sub Test_09_FilesDiffer_False()
     On Error GoTo eh
     Dim fso     As New FileSystemObject
     Dim sFile   As String
-    Dim f1      As File
-    Dim f2      As File
-    Dim a       As Variant
-    Dim v       As Variant
+    Dim f1      As FILE
+    Dim f2      As FILE
     Dim i       As Long
-    Dim j       As Long
-    Dim k       As Long
     Dim aDiffs  As Variant
     
     ' Prepare
@@ -334,8 +314,8 @@ Public Sub Test_09_FilesDiffer_False()
     Set f2 = fso.GetFile("E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas")
     
     ' Test
-    mErH.BoP ErrSrc(PROC), "dif_file1 = ", f1.Name, "dif_file2 = ", f2.Name
-    Debug.Assert mFile.sDiffer(dif_file1:=f1, dif_file2:=f2, dif_ignore_empty_records:=True, dif_lines:=aDiffs) = True
+    mErH.BoP ErrSrc(PROC), "dif_file1 = ", f1.name, "dif_file2 = ", f2.name
+    Debug.Assert mFile.sDiffer(dif_file1:=f1, dif_file2:=f2, dif_ignore_empty_records:=True, dif_lines:=aDiffs) = False
     
 #If Debugging Then
     If mBasic.ArrayIsAllocated(aDiffs) Then
@@ -351,7 +331,6 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
     End Select
 End Sub
 
@@ -360,14 +339,9 @@ Public Sub Test_10_FilesDiffer_True()
     
     On Error GoTo eh
     Dim fso     As New FileSystemObject
-    Dim sFile   As String
-    Dim f1      As File
-    Dim f2      As File
-    Dim a       As Variant
-    Dim v       As Variant
+    Dim f1      As FILE
+    Dim f2      As FILE
     Dim i       As Long
-    Dim j       As Long
-    Dim k       As Long
     Dim aDiffs  As Variant
     
     ' Prepare
@@ -396,10 +370,49 @@ xt: mErH.EoP ErrSrc(PROC)
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt1ResumeError: Stop: Resume
         Case mErH.DebugOpt2ResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: End
+    End Select
+End Sub
+
+Public Sub Test_11_Txt()
+    Const PROC = "Test_11_Txt"
+    
+    On Error GoTo eh
+    Dim sFl     As String
+    Dim sTest   As String
+    Dim sResult As String
+    Dim a()     As String
+    Dim sSplit  As String
+    Dim fso     As New FileSystemObject
+    
+'    sFl = mFile.Temp()
+'    sTest = "My string"
+'
+'    mFile.Txt(tx_file_full_name:=sFl _
+'            , tx_append:=False _
+'             ) = sTest
+'    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
+'    a = Split(sResult, sSplit)
+'    Debug.Assert a(0) = sTest
+'    If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
+    
+    sFl = mFile.Temp()
+    sTest = ""
+    mFile.Txt(tx_file_full_name:=sFl _
+            , tx_append:=False _
+             ) = ""
+    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
+    Debug.Assert sResult = vbNullString
+
+xt: If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
+    Set fso = Nothing
+    Exit Sub
+
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
     End Select
 End Sub
 
 Private Function ErrSrc(ByVal sProc As String) As String
-    ErrSrc = ThisWorkbook.Name & ": mTest." & sProc
+    ErrSrc = ThisWorkbook.name & ": mTest." & sProc
 End Function

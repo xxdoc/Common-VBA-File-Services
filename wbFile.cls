@@ -8,23 +8,17 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
-' -------------------------------------------------------------------
-' Standard Module mExists
-'
-' Requires: Reference to: "Microsoft Scripting Runtime"
-'
-' W. Rauschenberger, Berlin Sept 2019
-' -------------------------------------------------------------------
-Const HOSTED_COMM_COMPS = "mFile"
+
+Private Const HOSTED_RAWS = "mFile"
 
 Private Sub Workbook_Open()
 #If CompMan Then
-    mCompMan.UpdateUsedCommCompsTheOriginHasChanged wbTarget:=ThisWorkbook, sHosted:=HOSTED_COMM_COMPS
+    mCompMan.UpdateClonesTheRawHasChanged uc_wb:=ThisWorkbook, uc_hosted:=HOSTED_RAWS
 #End If
 End Sub
 
 Private Sub Workbook_BeforeSave(ByVal SaveAsUI As Boolean, Cancel As Boolean)
 #If CompMan Then
-    mCompMan.ExportChangedComponents wb:=ThisWorkbook, sHosted:=HOSTED_COMM_COMPS
+    mCompMan.ExportChangedComponents ec_wb:=ThisWorkbook, ec_hosted:=HOSTED_RAWS
 #End If
 End Sub
