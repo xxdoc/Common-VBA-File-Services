@@ -24,7 +24,6 @@ Option Private Module
 ' W. Rauschenberger, Berlin Nov 2020
 ' -----------------------------------------------------------------------------------
 Public Const VALUE_COMMENT = " ; "
-Private Const VALUE_VARTYPE = "VarType="
 
 Private Declare PtrSafe Function WritePrivateProfileString _
                 Lib "kernel32" Alias "WritePrivateProfileStringA" _
@@ -85,65 +84,63 @@ Public Enum enVarType
 End Enum
 
 Public Property Get Arry( _
-           Optional ByVal ar_file_full_name As String, _
-           Optional ByVal ar_ignore_empty As Boolean = False) As Variant
-' ---------------------------------------------------------------------
-' Returns the content of the text file (ar_file) as array by
-' considering any kind of line break characters. In case the file is
-' empty the returned array will not be allocated!
-' ---------------------------------------------------------------------
+           Optional ByVal fa_file_full_name As String, _
+           Optional ByVal fa_exclude_empty_records As Boolean = False) As Variant
+' ------------------------------------------------------------------------------------
+' Returns the content of the file (vFile) - which may be provided as file object or
+' full file name - as array by considering any kind of line break characters.
+' ------------------------------------------------------------------------------------
     Const PROC  As String = "Arry"
     
     On Error GoTo eh
+    Dim cll     As New Collection
     Dim ts      As TextStream
     Dim a       As Variant
     Dim a1()    As String
     Dim sSplit  As String
-    Dim fso     As New FileSystemObject
+    Dim fso     As File
     Dim sFile   As String
     Dim i       As Long
     Dim j       As Long
-    Dim cll     As New Collection
+    Dim v       As Variant
     
-    If Not fso.FileExists(ar_file_full_name) _
-    Then Err.Raise AppErr(1), ErrSrc(PROC), "The file '" & ar_file_full_name & "' does not exist!"
+    If Not Exists(fa_file_full_name, fso) _
+    Then Err.Raise AppErr(1), ErrSrc(PROC), "The file object (vFile) does not exist!"
     
     '~~ Unload file into a test stream
-    Set ts = fso.OpenTextFile(ar_file_full_name)
-    With ts
-        On Error Resume Next ' may be empty
-        sFile = .ReadAll
-        .Close
+    With New FileSystemObject
+        Set ts = .OpenTextFile(fso.Path, 1)
+        With ts
+            On Error Resume Next ' may be empty
+            sFile = .ReadAll
+            .Close
+        End With
     End With
     
     If sFile = vbNullString Then GoTo xt
     
     '~~ Get the kind of line break used
-    If InStr(sFile, vbCrLf) <> 0 Then sSplit = vbCrLf _
-    Else If InStr(sFile, vbLf) <> 0 Then sSplit = sSplit & vbLf _
-    Else If InStr(sFile, vbCr) <> 0 Then sSplit = vbCr
-        
-    If Not ar_ignore_empty Then
-        Arry = Split(sFile, sSplit)
-        GoTo xt
-    End If
-        
-    '~~ Get string as array and transfer only not empty items into a new array via a collection
-    a = Split(sFile, sSplit)
-
-    '~~ Transfer all non-empty items into a collection
-    For i = LBound(a) To UBound(a)
-        If Len(Trim$(a(i))) <> 0 Then cll.Add a(i)
-    Next i
-    '~~ Transfer the collection items into the target array
-    ReDim a1(cll.Count - 1)
-    For i = 1 To cll.Count
-        a1(i - 1) = cll.Item(i)
-    Next i
-    Arry = a1
+    If InStr(sFile, vbCr) <> 0 Then sSplit = vbCr
+    If InStr(sFile, vbLf) <> 0 Then sSplit = sSplit & vbLf
     
-xt: Set ts = Nothing
-    Set fso = Nothing
+    a = Split(sFile, sSplit)    ' Stream to array
+      
+    If Not fa_exclude_empty_records Then
+        Arry = a
+    Else
+        '~~ Extract non-empty items
+        For i = LBound(a) To UBound(a)
+            If Len(Trim$(a(i))) <> 0 Then cll.Add a(i)
+        Next i
+        ReDim a1(cll.Count - 1)
+        j = 0
+        For Each v In cll
+            a1(j) = v:  j = j + 1
+        Next v
+        Arry = a1
+    End If
+    
+xt: Set cll = Nothing
     Exit Property
     
 eh: ErrMsg ErrSrc(PROC)
@@ -174,7 +171,7 @@ Public Property Get SectionNames(Optional ByVal sn_file As String) As Dictionary
         Else strBuffer = String(Len(strBuffer) * 2, 0)
         iLen = GetPrivateProfileSectionNames(strBuffer, Len(strBuffer), sn_file)
     Loop
-    strBuffer = Left$(strBuffer, iLen)
+    strBuffer = left$(strBuffer, iLen)
     
     If Len(strBuffer) <> 0 Then
         i = 0
@@ -207,6 +204,7 @@ Public Property Get Txt( _
     On Error GoTo eh
     Dim fso As New FileSystemObject
     Dim ts  As TextStream
+    Dim s   As String
     
     tx_append = tx_append ' not used! just for the synch with the Let property
     If Not fso.FileExists(tx_file_full_name) _
@@ -214,7 +212,11 @@ Public Property Get Txt( _
 
     Set ts = fso.OpenTextFile(FileName:=tx_file_full_name, IOMode:=ForReading)
     If Not ts.AtEndOfStream Then
-        Txt = ts.ReadAll
+        s = ts.ReadAll
+        '~~ Get the kind of line break used
+        If InStr(s, vbCrLf) <> 0 Then tx_split = vbCrLf _
+        Else If InStr(s, vbLf) <> 0 Then tx_split = vbLf _
+        Else If InStr(s, vbCr) <> 0 Then tx_split = vbCr
     Else
         Txt = vbNullString
     End If
@@ -263,11 +265,10 @@ xt: ts.Close
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
-Public Property Get value( _
+Public Property Get Value( _
            Optional ByVal vl_file As String, _
            Optional ByVal vl_section As String, _
-           Optional ByVal vl_value_name As String, _
-           Optional ByRef vl_comment As String) As Variant
+           Optional ByVal vl_value_name As String) As Variant
 ' -----------------------------------------------------------
 ' Read a value with a specific name from a section
 ' [section]
@@ -289,29 +290,8 @@ Public Property Get value( _
                                     , nSize:=Len(sRetVal) _
                                     , lpg_FileName:=vl_file _
                                      )
-    vValue = Left$(sRetVal, lResult)
-    
-    '~~ Unstrip and return a possibly added comment provided it's not a VarType= comment
-    '~~ which indicates which kind of vartype is to be returned
-    If InStr(vValue, VALUE_COMMENT) <> 0 Then
-        vl_comment = Split(vValue, VALUE_COMMENT)(1)
-        If InStr(vl_comment, VALUE_VARTYPE) <> 0 Then
-            '~~ The comment is a VarType indication generated by the optional vartype argument
-            Select Case Split(vl_comment, "=")(1)
-                Case enVarType.vbBoolean:   value = CBool(Split(vValue, VALUE_COMMENT)(0))
-                Case enVarType.vbCurrency:  value = CCur(Split(vValue, VALUE_COMMENT)(0))
-                Case enVarType.vbDate:      value = CDate(Split(vValue, VALUE_COMMENT)(0))
-                Case enVarType.vbDouble:    value = CDbl(Split(vValue, VALUE_COMMENT)(0))
-                Case enVarType.vbInteger:   value = CInt(Split(vValue, VALUE_COMMENT)(0))
-                Case enVarType.vbLong:      value = CLng(Split(vValue, VALUE_COMMENT)(0))
-                Case enVarType.vbSingle:    value = CSng(Split(vValue, VALUE_COMMENT)(0))
-                Case Else:                  value = Split(vValue, VALUE_COMMENT)(0)
-            End Select
-            vl_comment = vbNullString
-        End If
-    Else
-        value = vValue
-    End If
+    vValue = left$(sRetVal, lResult)
+    Value = vValue
     
 xt: Exit Property
 
@@ -322,11 +302,10 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
     End Select
 End Property
 
-Public Property Let value( _
+Public Property Let Value( _
            Optional ByVal vl_file As String, _
            Optional ByVal vl_section As String, _
            Optional ByVal vl_value_name As String, _
-           Optional ByRef vl_comment As String, _
                     ByVal vl_value As Variant)
 ' --------------------------------------------------
 ' Write a value under a name into a section in a
@@ -338,19 +317,11 @@ Public Property Let value( _
     On Error GoTo eh
     Dim lChars      As Long
     Dim sValue      As String
-    Dim sComment    As String
-    
-    If vl_comment <> vbNullString Then
-        sComment = " ; " & vl_comment
-        sComment = Replace(sComment, VALUE_COMMENT & VALUE_COMMENT, VALUE_COMMENT)
-        sComment = Replace(sComment, ";;", ";")
-    End If
     
     Select Case VarType(vl_value)
         Case vbBoolean: sValue = VBA.CStr(VBA.CLng(vl_value))
         Case Else:      sValue = vl_value
     End Select
-    sValue = sValue & sComment
     
     lChars = WritePrivateProfileString(lpw_ApplicationName:=vl_section _
                                      , lpw_KeyName:=vl_value_name _
@@ -394,7 +365,7 @@ Private Function AppIsInstalled(ByVal sApp As String) As Boolean
     
     Dim i As Long: i = 1
     
-    Do Until Left(Environ$(i), 5) = "Path="
+    Do Until left(Environ$(i), 5) = "Path="
         i = i + 1
     Loop
     AppIsInstalled = InStr(Environ$(i), sApp) <> 0
@@ -521,7 +492,7 @@ End Function
 
 Public Sub Delete(ByVal v As Variant)
 
-    Dim fl  As FILE
+    Dim fl  As File
 
     With New FileSystemObject
         If TypeName(v) = "File" Then
@@ -558,7 +529,7 @@ Private Function ErrSrc(ByVal sProc As String) As String
 End Function
 
 Public Function Exists(ByVal xst_file As Variant, _
-              Optional ByRef xst_fso As FILE = Nothing, _
+              Optional ByRef xst_fso As File = Nothing, _
               Optional ByRef xst_cll As Collection = Nothing) As Boolean
 ' ------------------------------------------------------------------
 ' Returns TRUE when the file (xst_file) - which may be a file object
@@ -576,7 +547,7 @@ Public Function Exists(ByVal xst_file As Variant, _
     Dim sFile   As String
     Dim fldr    As Folder
     Dim sfldr   As Folder   ' Sub-Folder
-    Dim fl      As FILE
+    Dim fl      As File
     Dim sPath   As String
     Dim queue   As Collection
 
@@ -590,7 +561,7 @@ Public Function Exists(ByVal xst_file As Variant, _
     If Not TypeName(xst_cll) = "Nothing" And Not TypeName(xst_cll) = "Collection" _
     Then Err.Raise AppErr(3), ErrSrc(PROC), "The provided return parameter (xst_cll) is not a Collection type!"
 
-    If TypeOf xst_file Is FILE Then
+    If TypeOf xst_file Is File Then
         With New FileSystemObject
             On Error Resume Next
             sTest = xst_file.name
@@ -626,7 +597,7 @@ Public Function Exists(ByVal xst_file As Variant, _
                         queue.Add sfldr ' enqueue (collect) all subfolders
                     Next sfldr
                     For Each fl In fldr.Files
-                        If InStr(fl.name, sFile) <> 0 And Left(fl.name, 1) <> "~" Then
+                        If InStr(fl.name, sFile) <> 0 And left(fl.name, 1) <> "~" Then
                             '~~ Return the existing file which meets the search criteria
                             '~~ as File object in a collection
                             xst_cll.Add fl
@@ -691,13 +662,13 @@ End Function
 
 Public Property Get Temp(Optional ByVal tmp_extension As String = ".tmp") As String
     Dim fso As New FileSystemObject
-    If Left(tmp_extension, 1) <> "." Then tmp_extension = "." & tmp_extension
+    If left(tmp_extension, 1) <> "." Then tmp_extension = "." & tmp_extension
     Temp = Replace(fso.GetTempName, ".tmp", tmp_extension)
     Temp = fso.GetParentFolderName(ActiveWorkbook.FullName) & "\" & Temp
     Set fso = Nothing
 End Property
 
-Public Function GetFile(ByVal gf_path As String) As FILE
+Public Function GetFile(ByVal gf_path As String) As File
     With New FileSystemObject
         Set GetFile = .GetFile(gf_path)
     End With
@@ -763,8 +734,8 @@ eh: ErrMsg ErrSrc(PROC)
 End Function
 
 Public Function sDiffer( _
-                  ByVal dif_file1 As FILE, _
-                  ByVal dif_file2 As FILE, _
+                  ByVal dif_file1 As File, _
+                  ByVal dif_file2 As File, _
          Optional ByVal dif_stop_after As Long = 1, _
          Optional ByVal dif_ignore_empty_records As Boolean = False, _
          Optional ByVal dif_ignore_case As Boolean = True, _
@@ -950,7 +921,7 @@ Public Sub SectionsLet( _
         For Each vn In dctValues
             sName = vn
             vValue = dctValues(vn)
-            mFile.value(vl_file:=sl_file _
+            mFile.Value(vl_file:=sl_file _
                     , vl_section:=sSection _
                     , vl_value_name:=sName _
                     ) = vValue
@@ -1019,7 +990,7 @@ Public Function SelectFile( _
             Optional ByVal sel_filters As String = "*.*", _
             Optional ByVal sel_filter_name As String = "File", _
             Optional ByVal sel_title As String = vbNullString, _
-            Optional ByRef sel_result As FILE) As Boolean
+            Optional ByRef sel_result As File) As Boolean
 ' --------------------------------------------------------------
 ' When a file had been selected TRUE is returned and the
 ' selected file is returned as File object (sel_result).
@@ -1095,7 +1066,7 @@ Public Function ToArray(ByVal ta_file As Variant, _
     Dim a       As Variant
     Dim a1()    As String
     Dim sSplit  As String
-    Dim fso     As FILE
+    Dim fso     As File
     Dim sFile   As String
     Dim i       As Long
     Dim j       As Long
@@ -1163,7 +1134,7 @@ Public Function ToDict(ByVal td_file As Variant) As Dictionary
     Dim a       As Variant
     Dim dct     As New Dictionary
     Dim sSplit  As String
-    Dim fso     As FILE
+    Dim fso     As File
     Dim sFile   As String
     Dim i       As Long
     
@@ -1237,7 +1208,7 @@ Public Function ValueNames( _
                                         , nSize:=Len(strBuffer) _
                                         , lpg_FileName:=vn_file _
                                          )
-        sNames = Left$(strBuffer, lResult)
+        sNames = left$(strBuffer, lResult)
     
         If sNames <> vbNullString Then                                         ' If there were any names
             asNames = Split(sNames, vbNullChar)                      ' have them split into an array
@@ -1261,7 +1232,7 @@ Public Function ValueNames( _
                                             , nSize:=Len(strBuffer) _
                                             , lpg_FileName:=vn_file _
                                              )
-            sNames = Left$(strBuffer, lResult)
+            sNames = left$(strBuffer, lResult)
         
             If sNames <> vbNullString Then                                         ' If there were any names
                 asNames = Split(sNames, vbNullChar)                      ' have them split into an array
@@ -1299,19 +1270,8 @@ Public Function Values( _
     Set dctValueNames = mFile.ValueNames(vn_file:=vl_file, vn_section:=vl_section)
     For Each vn In dctValueNames
         If Not dctValues.Exists(vn) _
-        Then mDct.DctAdd add_dct:=dctValues, add_key:=vn, add_item:=mFile.value(vl_file:=vl_file, vl_section:=vl_section, vl_value_name:=vn)
+        Then mDct.DctAdd add_dct:=dctValues, add_key:=vn, add_item:=mFile.Value(vl_file:=vl_file, vl_section:=vl_section, vl_value_name:=vn)
     Next vn
     Set Values = dctValues
     
 End Function
-
-Private Function ArrayIsAllocated(arr As Variant) As Boolean
-    
-    On Error Resume Next
-    ArrayIsAllocated = IsArray(arr) _
-    And Not IsError(LBound(arr, 1)) _
-    And LBound(arr, 1) <= UBound(arr, 1)
-    
-End Function
-
-

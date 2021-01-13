@@ -44,7 +44,7 @@ Public Sub Test_07_SelectFile()
     Const PROC = "Test_07_SelectFile"
     
     On Error GoTo eh
-    Dim fso As FILE
+    Dim fso As File
 
     mErH.BoP ErrSrc(PROC)
     If mFile.SelectFile( _
@@ -73,7 +73,7 @@ Public Sub Test_02_FileExists_ByObject()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As FILE
+    Dim fso         As File
 
     Set wb = ThisWorkbook
     With New FileSystemObject
@@ -98,8 +98,8 @@ Public Sub Test_03_FileExists_ByFullName()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As FILE
-    Dim fsoExists   As FILE
+    Dim fso         As File
+    Dim fsoExists   As File
 
     mErH.BoP ErrSrc(PROC)
     Set wb = ThisWorkbook
@@ -162,7 +162,7 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     
     On Error GoTo eh
     Dim wb      As Workbook
-    Dim fsoFile As FILE
+    Dim fsoFile As File
     Dim fso     As New FileSystemObject
     Dim cll     As Collection
     Dim sWldCrd As String
@@ -170,7 +170,7 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     ' Prepare
     Set wb = ThisWorkbook
     Set fsoFile = fso.GetFile(wb.FullName)
-    sWldCrd = left(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
+    sWldCrd = VBA.left$(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
     
     ' Test
     mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
@@ -250,44 +250,38 @@ Public Sub Test_08_Arry_Get()
     Const PROC = "Test_08_Arry_Get"
     
     On Error GoTo eh
-    Dim sFile   As String
-    Dim a       As Variant
-    Dim v       As Variant
-    Dim i       As Long
-    Dim j       As Long
-    Dim k       As Long
-    Dim fso     As New FileSystemObject
+    Dim sFile       As String
+    Dim lInclEmpty  As Long
+    Dim lEmpty1     As Long
+    Dim lExclEmpty  As Long
+    Dim lEmpty2     As Long
+    Dim fso         As New FileSystemObject
+    Dim a           As Variant
+    Dim v           As Variant
+    Dim sTemp       As String
     
     mErH.BoP ErrSrc(PROC)
-    
     sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
     
-    a = mFile.Arry(fa_file_full_name:=fso.GetFile(sFile))
-    '~~ Count empty records
-    For i = LBound(a) To UBound(a)
-        If Trim$(a(i)) = vbNullString Then j = j + 1
-    Next i
-    Debug.Assert j > 0
-    k = UBound(a) - j - 1 ' k is the expected result of the next step
+    sTemp = mFile.Temp()
+    mFile.Txt(sTemp) = "xxx" & vbCrLf & "" & "yyy"
     
-    a = mFile.Arry(fa_file_full_name:=fso.GetFile(sFile), fa_exclude_empty_records:=True)
-    '~~ Count empty records
-    j = 0
-    For i = LBound(a) To UBound(a)
-        If Len(Trim$(a(i))) = 0 Then
-            j = j + 1
-        End If
-    Next i
-    Debug.Assert j = 0
-    Debug.Assert UBound(a) = k
-    
-#If Debugging Then
+    '~~ Count empty records when array contains all text lines
+    a = mFile.Arry(fa_file_full_name:=sTemp, fa_exclude_empty_records:=False)
+    lInclEmpty = UBound(a) + 1
+    lEmpty1 = 0
     For Each v In a
-        Debug.Print ">>" & v & "<<"
+        If VBA.Trim$(v) = vbNullString Then lEmpty1 = lEmpty1 + 1
+        If VBA.Len(Trim$(v)) = 0 Then lEmpty2 = lEmpty2 + 1
     Next v
-#End If
-
-xt: Set fso = Nothing
+    
+    '~~ Count empty records
+    a = mFile.Arry(fa_file_full_name:=sTemp, fa_exclude_empty_records:=True)
+    lExclEmpty = UBound(a) + 1
+    Debug.Assert lExclEmpty = lInclEmpty - lEmpty1
+    
+xt: If fso.FileExists(sTemp) Then fso.DeleteFile sTemp
+    Set fso = Nothing
     mErH.EoP ErrSrc(PROC)
     Exit Sub
     
@@ -303,8 +297,8 @@ Public Sub Test_09_FilesDiffer_False()
     On Error GoTo eh
     Dim fso     As New FileSystemObject
     Dim sFile   As String
-    Dim f1      As FILE
-    Dim f2      As FILE
+    Dim f1      As File
+    Dim f2      As File
     Dim i       As Long
     Dim aDiffs  As Variant
     
@@ -339,8 +333,8 @@ Public Sub Test_10_FilesDiffer_True()
     
     On Error GoTo eh
     Dim fso     As New FileSystemObject
-    Dim f1      As FILE
-    Dim f2      As FILE
+    Dim f1      As File
+    Dim f2      As File
     Dim i       As Long
     Dim aDiffs  As Variant
     

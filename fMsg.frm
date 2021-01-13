@@ -1655,7 +1655,7 @@ Private Sub SetupMsgSectionMonoSpaced(ByVal section As Long, _
         .Font.name = sMonoSpacedFontName
         .Font.Size = siMonoSpacedFontSize
         .AutoSize = True
-        .value = text
+        .Value = text
         .AutoSize = False
         .SelStart = 0
         .left = siHmarginFrames
@@ -1729,7 +1729,7 @@ Private Sub SetupMsgSectionPropSpaced(ByVal section As Long, _
         .AutoSize = True
         .WordWrap = True
         .width = frText.width - siHmarginFrames
-        .value = text
+        .Value = text
         .SelStart = 0
         .left = HSPACE_LEFT
         frText.width = .left + .width + siHmarginFrames

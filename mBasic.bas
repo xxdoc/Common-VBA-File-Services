@@ -118,7 +118,7 @@ Public Function AppIsInstalled(ByVal sApp As String) As Boolean
     
     Dim i As Long: i = 1
     
-    Do Until Left$(Environ$(i), 5) = "Path="
+    Do Until left$(Environ$(i), 5) = "Path="
         i = i + 1
     Loop
     AppIsInstalled = InStr(Environ$(i), sApp) <> 0
@@ -129,7 +129,8 @@ Public Function ArrayCompare(ByVal ac_a1 As Variant, _
                              ByVal ac_a2 As Variant, _
                     Optional ByVal ac_stop_after As Long = 1, _
                     Optional ByVal ac_id1 As String = vbNullString, _
-                    Optional ByVal ac_id2 As String = vbNullString) As Variant
+                    Optional ByVal ac_id2 As String = vbNullString, _
+                    Optional ByVal ac_ignore_case As Boolean = True) As Variant
 ' ----------------------------------------------------------------------------
 ' Returns an array of n (as_stop_after) lines which are different between
 ' array 1 (ac_a1) and array 2 (ac_a2). Each line element contains the
@@ -144,7 +145,10 @@ Public Function ArrayCompare(ByVal ac_a1 As Variant, _
     Dim l       As Long
     Dim i       As Long
     Dim va()    As Variant
-
+    Dim lMethod As VbCompareMethod
+    
+    If ac_ignore_case Then lMethod = vbTextCompare Else lMethod = vbBinaryCompare
+    
     If Not mBasic.ArrayIsAllocated(ac_a1) And mBasic.ArrayIsAllocated(ac_a2) Then
         va = ac_a2
     ElseIf mBasic.ArrayIsAllocated(ac_a1) And Not mBasic.ArrayIsAllocated(ac_a2) Then
@@ -155,7 +159,7 @@ Public Function ArrayCompare(ByVal ac_a1 As Variant, _
     
     l = 0
     For i = LBound(ac_a1) To Min(UBound(ac_a1), UBound(ac_a2))
-        If ac_a1(i) <> ac_a2(i) Then
+        If StrComp(ac_a1(i), ac_a2(i), lMethod) <> 0 Then
             ReDim Preserve va(l)
             va(l) = Format$(i, "000") & " " & ac_id1 & " '" & ac_a1(i) & "'  < >  '" & ac_id2 & " " & ac_a2(i) & "'"
             l = l + 1
@@ -346,11 +350,11 @@ Public Sub ArrayToRange(ByVal vArr As Variant, _
     If bOneCol Then
         '~~ One column, n rows
         Set rTarget = r.Cells(1, 1).Resize(UBound(vArr), 1)
-        rTarget.value = Application.Transpose(vArr)
+        rTarget.Value = Application.Transpose(vArr)
     Else
         '~~ One column, n rows
         Set rTarget = r.Cells(1, 1).Resize(1, UBound(vArr))
-        rTarget.value = vArr
+        rTarget.Value = vArr
     End If
     
 xt: Exit Sub
@@ -575,14 +579,6 @@ Public Function SelectFolder( _
     End With
     SelectFolder = sFolder
 
-End Function
-
-Public Function Space(ByVal l As Long) As String
-' --------------------------------------------------
-' Unifies the VB differences Space$ and Space$ which
-' lead to code diferences where there aren't any.
-' --------------------------------------------------
-    Space = Space$(l)
 End Function
 
 Private Sub ErrMsg( _
