@@ -44,17 +44,17 @@ Public Sub Test_07_SelectFile()
     Const PROC = "Test_07_SelectFile"
     
     On Error GoTo eh
-    Dim fso As File
+    Dim fso As FILE
 
     mErH.BoP ErrSrc(PROC)
     If mFile.SelectFile( _
-                        sel_init_path:=ThisWorkbook.Path, _
+                        sel_init_path:=ThisWorkbook.PATH, _
                         sel_filters:="*.xl*", _
                         sel_filter_name:="Excel File", _
                         sel_title:="Select the (preselected by filtering) file", _
                         sel_result:=fso _
                         ) = True Then
-        Debug.Assert fso.Path = ThisWorkbook.FullName
+        Debug.Assert fso.PATH = ThisWorkbook.FullName
     Else
         Debug.Assert fso Is Nothing
     End If
@@ -73,7 +73,7 @@ Public Sub Test_02_FileExists_ByObject()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As File
+    Dim fso         As FILE
 
     Set wb = ThisWorkbook
     With New FileSystemObject
@@ -98,8 +98,8 @@ Public Sub Test_03_FileExists_ByFullName()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As File
-    Dim fsoExists   As File
+    Dim fso         As FILE
+    Dim fsoExists   As FILE
 
     mErH.BoP ErrSrc(PROC)
     Set wb = ThisWorkbook
@@ -108,7 +108,7 @@ Public Sub Test_03_FileExists_ByFullName()
         Set fso = .GetFile(wb.FullName)
     End With
       
-    Debug.Assert mFile.Exists(fso.Path, fsoExists) = True
+    Debug.Assert mFile.Exists(fso.PATH, fsoExists) = True
     Debug.Assert fsoExists Is fso
             
 xt: mErH.EoP ErrSrc(PROC)
@@ -162,7 +162,7 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     
     On Error GoTo eh
     Dim wb      As Workbook
-    Dim fsoFile As File
+    Dim fsoFile As FILE
     Dim fso     As New FileSystemObject
     Dim cll     As Collection
     Dim sWldCrd As String
@@ -170,13 +170,13 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     ' Prepare
     Set wb = ThisWorkbook
     Set fsoFile = fso.GetFile(wb.FullName)
-    sWldCrd = VBA.left$(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
+    sWldCrd = VBA.left$(fsoFile.PATH, Len(fsoFile.PATH) - 3) & "*"
     
     ' Test
     mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
     Debug.Assert mFile.Exists(xst_file:=sWldCrd, xst_cll:=cll) = True
     Debug.Assert cll.Count = 1
-    Debug.Assert cll.Item(1).Path = fsoFile.Path
+    Debug.Assert cll.Item(1).PATH = fsoFile.PATH
             
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
@@ -197,7 +197,7 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
 
     ' Prepare
     Set wb = ThisWorkbook
-    sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.name, ".")(0), vbNullString)
+    sWldCrd = Replace(wb.PATH & "\fMsg*", "\" & Split(wb.name, ".")(0), vbNullString)
     
     ' Test
     mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
@@ -228,7 +228,7 @@ Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
 
     ' Prepare
     Set wb = ThisWorkbook
-    sWldCrd = wb.Path & "\fMsg*"
+    sWldCrd = wb.PATH & "\fMsg*"
     
     ' Test
     mErH.BoP ErrSrc(PROC), "xst_file:=", sWldCrd
@@ -297,8 +297,8 @@ Public Sub Test_09_FilesDiffer_False()
     On Error GoTo eh
     Dim fso     As New FileSystemObject
     Dim sFile   As String
-    Dim f1      As File
-    Dim f2      As File
+    Dim f1      As FILE
+    Dim f2      As FILE
     Dim i       As Long
     Dim aDiffs  As Variant
     
@@ -309,7 +309,7 @@ Public Sub Test_09_FilesDiffer_False()
     
     ' Test
     mErH.BoP ErrSrc(PROC), "dif_file1 = ", f1.name, "dif_file2 = ", f2.name
-    Debug.Assert mFile.sDiffer(dif_file1:=f1, dif_file2:=f2, dif_ignore_empty_records:=True, dif_lines:=aDiffs) = False
+    Debug.Assert mFile.Differs(dif_file1:=f1, dif_file2:=f2, dif_ignore_empty_records:=True, dif_lines:=aDiffs) = False
     
 #If Debugging Then
     If mBasic.ArrayIsAllocated(aDiffs) Then
@@ -333,8 +333,8 @@ Public Sub Test_10_FilesDiffer_True()
     
     On Error GoTo eh
     Dim fso     As New FileSystemObject
-    Dim f1      As File
-    Dim f2      As File
+    Dim f1      As FILE
+    Dim f2      As FILE
     Dim i       As Long
     Dim aDiffs  As Variant
     
@@ -344,7 +344,7 @@ Public Sub Test_10_FilesDiffer_True()
     
     ' Test
     mErH.BoP ErrSrc(PROC)
-    Debug.Assert mFile.sDiffer(dif_file1:=f1, _
+    Debug.Assert mFile.Differs(dif_file1:=f1, _
                                dif_file2:=f2, _
                                dif_ignore_empty_records:=True, _
                                dif_lines:=aDiffs _
