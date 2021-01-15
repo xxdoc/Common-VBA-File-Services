@@ -98,7 +98,7 @@ Public Property Get Arry( _
     Dim a       As Variant
     Dim a1()    As String
     Dim sSplit  As String
-    Dim fso     As File
+    Dim fso     As FILE
     Dim sFile   As String
     Dim i       As Long
     Dim j       As Long
@@ -109,7 +109,7 @@ Public Property Get Arry( _
     
     '~~ Unload file into a test stream
     With New FileSystemObject
-        Set ts = .OpenTextFile(fso.Path, 1)
+        Set ts = .OpenTextFile(fso.PATH, 1)
         With ts
             On Error Resume Next ' may be empty
             sFile = .ReadAll
@@ -220,7 +220,7 @@ Public Property Get Txt( _
     Else
         Txt = vbNullString
     End If
-    If Txt = vbCrLf Then Txt = vbNullString
+    If Txt = vbCrLf Then Txt = vbNullString Else Txt = s
 
 xt: Exit Property
 
@@ -492,12 +492,12 @@ End Function
 
 Public Sub Delete(ByVal v As Variant)
 
-    Dim fl  As File
+    Dim fl  As FILE
 
     With New FileSystemObject
         If TypeName(v) = "File" Then
             Set fl = v
-            .DeleteFile fl.Path
+            .DeleteFile fl.PATH
         ElseIf TypeName(v) = "String" Then
             If .FileExists(v) Then
                 .DeleteFile v
@@ -529,7 +529,7 @@ Private Function ErrSrc(ByVal sProc As String) As String
 End Function
 
 Public Function Exists(ByVal xst_file As Variant, _
-              Optional ByRef xst_fso As File = Nothing, _
+              Optional ByRef xst_fso As FILE = Nothing, _
               Optional ByRef xst_cll As Collection = Nothing) As Boolean
 ' ------------------------------------------------------------------
 ' Returns TRUE when the file (xst_file) - which may be a file object
@@ -547,7 +547,7 @@ Public Function Exists(ByVal xst_file As Variant, _
     Dim sFile   As String
     Dim fldr    As Folder
     Dim sfldr   As Folder   ' Sub-Folder
-    Dim fl      As File
+    Dim fl      As FILE
     Dim sPath   As String
     Dim queue   As Collection
 
@@ -561,14 +561,14 @@ Public Function Exists(ByVal xst_file As Variant, _
     If Not TypeName(xst_cll) = "Nothing" And Not TypeName(xst_cll) = "Collection" _
     Then Err.Raise AppErr(3), ErrSrc(PROC), "The provided return parameter (xst_cll) is not a Collection type!"
 
-    If TypeOf xst_file Is File Then
+    If TypeOf xst_file Is FILE Then
         With New FileSystemObject
             On Error Resume Next
             sTest = xst_file.name
             Exists = Err.Number = 0
             If Exists Then
                 '~~ Return the existing file as File object
-                Set xst_fso = .GetFile(xst_file.Path)
+                Set xst_fso = .GetFile(xst_file.PATH)
                 GoTo xt
             End If
         End With
@@ -618,7 +618,7 @@ Public Function Extension(ByVal vFile As Variant)
 
     With New FileSystemObject
         If TypeName(vFile) = "File" Then
-            Extension = .GetExtensionName(vFile.Path)
+            Extension = .GetExtensionName(vFile.PATH)
         Else
             Extension = .GetExtensionName(vFile)
         End If
@@ -668,7 +668,7 @@ Public Property Get Temp(Optional ByVal tmp_extension As String = ".tmp") As Str
     Set fso = Nothing
 End Property
 
-Public Function GetFile(ByVal gf_path As String) As File
+Public Function GetFile(ByVal gf_path As String) As FILE
     With New FileSystemObject
         Set GetFile = .GetFile(gf_path)
     End With
@@ -734,8 +734,8 @@ eh: ErrMsg ErrSrc(PROC)
 End Function
 
 Public Function sDiffer( _
-                  ByVal dif_file1 As File, _
-                  ByVal dif_file2 As File, _
+                  ByVal dif_file1 As FILE, _
+                  ByVal dif_file2 As FILE, _
          Optional ByVal dif_stop_after As Long = 1, _
          Optional ByVal dif_ignore_empty_records As Boolean = False, _
          Optional ByVal dif_ignore_case As Boolean = True, _
@@ -990,7 +990,7 @@ Public Function SelectFile( _
             Optional ByVal sel_filters As String = "*.*", _
             Optional ByVal sel_filter_name As String = "File", _
             Optional ByVal sel_title As String = vbNullString, _
-            Optional ByRef sel_result As File) As Boolean
+            Optional ByRef sel_result As FILE) As Boolean
 ' --------------------------------------------------------------
 ' When a file had been selected TRUE is returned and the
 ' selected file is returned as File object (sel_result).
@@ -1066,7 +1066,7 @@ Public Function ToArray(ByVal ta_file As Variant, _
     Dim a       As Variant
     Dim a1()    As String
     Dim sSplit  As String
-    Dim fso     As File
+    Dim fso     As FILE
     Dim sFile   As String
     Dim i       As Long
     Dim j       As Long
@@ -1076,7 +1076,7 @@ Public Function ToArray(ByVal ta_file As Variant, _
     
     '~~ Unload file into a test stream
     With New FileSystemObject
-        Set ts = .OpenTextFile(fso.Path, 1)
+        Set ts = .OpenTextFile(fso.PATH, 1)
         With ts
             On Error Resume Next ' may be empty
             sFile = .ReadAll
@@ -1134,7 +1134,7 @@ Public Function ToDict(ByVal td_file As Variant) As Dictionary
     Dim a       As Variant
     Dim dct     As New Dictionary
     Dim sSplit  As String
-    Dim fso     As File
+    Dim fso     As FILE
     Dim sFile   As String
     Dim i       As Long
     
@@ -1143,7 +1143,7 @@ Public Function ToDict(ByVal td_file As Variant) As Dictionary
     
     '~~ Unload file into a test stream
     With New FileSystemObject
-        Set ts = .OpenTextFile(fso.Path, 1)
+        Set ts = .OpenTextFile(fso.PATH, 1)
         With ts
             On Error Resume Next ' may be empty
             sFile = .ReadAll
