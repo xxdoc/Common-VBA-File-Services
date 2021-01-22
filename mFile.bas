@@ -756,7 +756,7 @@ Public Function Differs( _
     
     '~~ Get and detect the difference by comparing the items one by one
     '~~ and optaining the line number from the Dictionary when different
-    If dct1.Count < dct2.Count Then
+    If dct1.Count <= dct2.Count Then
         For Each v In dct1 ' v - 1 = array index
             If VBA.StrComp(a1(v - 1), a2(v - 1), dif_compare) <> 0 Then
                 lDiffLine = v
