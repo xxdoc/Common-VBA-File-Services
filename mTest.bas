@@ -384,6 +384,22 @@ Public Sub Test_09_File_Differs()
         Debug.Print dctDiff.Items()(i)
     Next i
     
+    ' Test 4: Differs.Count = 1
+    mFile.Txt(tx_file_full_name:=sF1, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
+    mFile.Txt(tx_file_full_name:=sF2, tx_append:=False) = "A" & vbCrLf & "X" & vbCrLf & "C"
+    Set f1 = fso.GetFile(sF1)
+    Set f2 = fso.GetFile(sF2)
+    
+    Set dctDiff = mFile.Differs(dif_file1:=f1 _
+                              , dif_file2:=f2 _
+                              , dif_ignore_empty_records:=True _
+                              , dif_stop_after:=2 _
+                               )
+    Debug.Assert dctDiff.Count = 1
+    For i = 0 To dctDiff.Count - 1
+        Debug.Print dctDiff.Items()(i)
+    Next i
+
 xt: mErH.EoP ErrSrc(PROC)
     If fso.FileExists(sF1) Then fso.DeleteFile (sF1)
     If fso.FileExists(sF2) Then fso.DeleteFile (sF2)
