@@ -5,6 +5,14 @@ Option Explicit
 ' Test of all services of the module.
 ' -----------------------------------------------------------
 
+Private Property Let Status(ByVal s As String)
+    If s <> vbNullString Then
+        Application.StatusBar = "regression test mFile: " & s
+    Else
+        Application.StatusBar = vbNullString
+    End If
+End Property
+
 Public Sub Regression()
 ' ---------------------------------------------------------
 ' All results are asserted and there is no intervention
@@ -16,7 +24,10 @@ Public Sub Regression()
     Const PROC = "Regression"
 
     On Error GoTo eh
+    Dim sTestStatus As String
     
+    sTestStatus = "mFile Regression Test: "
+
     mErH.BoTP ErrSrc(PROC), mErH.AppErr(1) ' For the very last test on an error condition
     mTest.Test_01_FileExists_Not
     mTest.Test_02_FileExists_ByObject
@@ -43,8 +54,9 @@ Public Sub Test_07_SelectFile()
     Const PROC = "Test_07_SelectFile"
     
     On Error GoTo eh
-    Dim fso As FILE
+    Dim fso As File
 
+    Status = ErrSrc(PROC)
     mErH.BoP ErrSrc(PROC)
     If mFile.SelectFile( _
                         sel_init_path:=ThisWorkbook.Path, _
@@ -72,8 +84,9 @@ Public Sub Test_02_FileExists_ByObject()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As FILE
+    Dim fso         As File
 
+    Status = ErrSrc(PROC)
     Set wb = ThisWorkbook
     With New FileSystemObject
         Set fso = .GetFile(wb.FullName)
@@ -97,11 +110,12 @@ Public Sub Test_03_FileExists_ByFullName()
     
     On Error GoTo eh
     Dim wb          As Workbook
-    Dim fso         As FILE
-    Dim fsoExists   As FILE
+    Dim fso         As File
+    Dim fsoExists   As File
 
     mErH.BoP ErrSrc(PROC)
     Set wb = ThisWorkbook
+    Status = ErrSrc(PROC)
     
     With New FileSystemObject
         Set fso = .GetFile(wb.FullName)
@@ -124,6 +138,7 @@ Public Sub Test_99_FileExists_NoFileObject_NoString()
     
     On Error GoTo eh
 
+    Status = ErrSrc(PROC)
     mErH.BoP ErrSrc(PROC)
     mFile.Exists ThisWorkbook
     Debug.Assert mErH.AppErr(1)
@@ -144,7 +159,7 @@ Public Sub Test_01_FileExists_Not()
     On Error GoTo eh
 
     mErH.BoP ErrSrc(PROC), "xst_file:=", NOT_EXIST
-        
+    Status = ErrSrc(PROC)
     Debug.Assert mFile.Exists(xst_file:="Test.txt") = False
         
 xt: mErH.EoP ErrSrc(PROC)
@@ -161,11 +176,12 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     
     On Error GoTo eh
     Dim wb      As Workbook
-    Dim fsoFile As FILE
+    Dim fsoFile As File
     Dim fso     As New FileSystemObject
     Dim cll     As Collection
     Dim sWldCrd As String
     
+    Status = ErrSrc(PROC)
     ' Prepare
     Set wb = ThisWorkbook
     Set fsoFile = fso.GetFile(wb.FullName)
@@ -194,6 +210,7 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
     Dim cllFiles    As Collection
     Dim sWldCrd     As String
 
+    Status = ErrSrc(PROC)
     ' Prepare
     Set wb = ThisWorkbook
     sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.name, ".")(0), vbNullString)
@@ -225,6 +242,7 @@ Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
     Dim cllFiles    As Collection
     Dim sWldCrd     As String
 
+    Status = ErrSrc(PROC)
     ' Prepare
     Set wb = ThisWorkbook
     sWldCrd = wb.Path & "\fMsg*"
@@ -259,6 +277,7 @@ Public Sub Test_08_Arry_Get()
     Dim v           As Variant
     Dim sTemp       As String
     
+    Status = ErrSrc(PROC)
     mErH.BoP ErrSrc(PROC)
     sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
     
@@ -296,11 +315,12 @@ Public Sub Test_09_File_Differs_False()
     On Error GoTo eh
     Dim fso     As New FileSystemObject
     Dim sFile   As String
-    Dim f1      As FILE
-    Dim f2      As FILE
+    Dim f1      As File
+    Dim f2      As File
     Dim i       As Long
     Dim dctDiff As Dictionary
     
+    Status = ErrSrc(PROC)
     ' Prepare
     sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
     Set f1 = fso.GetFile("E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas")
@@ -325,17 +345,18 @@ Public Sub Test_09_File_Differs()
     
     On Error GoTo eh
     Dim fso     As New FileSystemObject
-    Dim f1      As FILE
-    Dim f2      As FILE
+    Dim f1      As File
+    Dim f2      As File
     Dim i       As Long
     Dim dctDiff As Dictionary
     Dim v       As Variant
     Dim sF1     As String
     Dim sF2     As String
 
+    Status = ErrSrc(PROC)
+    
     sF1 = mFile.Temp
     sF2 = mFile.Temp
-
 
     ' Prepare
     mFile.Txt(tx_file_full_name:=sF1, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
@@ -422,16 +443,17 @@ Public Sub Test_10_Txt()
     Dim sSplit  As String
     Dim fso     As New FileSystemObject
     
-'    sFl = mFile.Temp()
-'    sTest = "My string"
-'
-'    mFile.Txt(tx_file_full_name:=sFl _
-'            , tx_append:=False _
-'             ) = sTest
-'    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
-'    a = Split(sResult, sSplit)
-'    Debug.Assert a(0) = sTest
-'    If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
+    Status = ErrSrc(PROC)
+    sFl = mFile.Temp()
+    sTest = "My string"
+
+    mFile.Txt(tx_file_full_name:=sFl _
+            , tx_append:=False _
+             ) = sTest
+    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
+    a = Split(sResult, sSplit)
+    Debug.Assert a(0) = sTest
+    If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
     
     sFl = mFile.Temp()
     sTest = ""
@@ -443,6 +465,39 @@ Public Sub Test_10_Txt()
 
 xt: If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
     Set fso = Nothing
+    Exit Sub
+
+eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
+        Case mErH.DebugOpt1ResumeError: Stop: Resume
+        Case mErH.DebugOpt2ResumeNext: Resume Next
+    End Select
+End Sub
+
+Public Sub Test_11_Search()
+    Const PROC = "Test_11_Search"
+    
+    On Error GoTo eh
+    Dim cll As Collection
+    Dim v   As Variant
+    
+    Status = ErrSrc(PROC)
+    mErH.BoP ErrSrc(PROC)
+    Set cll = mFile.Search(fs_root:="e:\Ablage\Excel VBA\DevAndTest\Common" _
+                         , fs_mask:="*CompMan*.frx" _
+                         , fs_stop_after:=5 _
+                          )
+    For Each v In cll
+        Debug.Print v
+    Next v
+
+    Set cll = mFile.Search(fs_root:="e:\Ablage\Excel VBA\DevAndTest\Common" _
+                         , fs_mask:="*CompMan*.frx" _
+                         , fs_stop_after:=5 _
+                         , fs_in_subfolders:=False _
+                          )
+    Debug.Assert cll.Count = 0
+
+xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
 
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
