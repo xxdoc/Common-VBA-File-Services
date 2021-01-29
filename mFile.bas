@@ -198,10 +198,12 @@ Public Property Get Txt( _
          Optional ByVal ft_append As Boolean = True, _
          Optional ByRef ft_split As String) As String
 ' ----------------------------------------------------
-' Returns text file's (ft_file_full_name) conten as
-' string with VBA.Split string (ft_split).
+' Returns the text file's (ft_file) content as string
+' with VBA.Split() string in (ft_split).
+' Note: ft_append is not used but specified to comply
+'       with the Get Property declaration.
 ' ----------------------------------------------------
-    Const PROC = "TxtGet"
+    Const PROC = "Txt-Get"
     
     On Error GoTo eh
     Dim fso     As New FileSystemObject
@@ -247,13 +249,13 @@ Public Property Let Txt( _
          Optional ByVal ft_append As Boolean = True, _
          Optional ByRef ft_split As String, _
                   ByVal ft_string As String)
-' ----------------------------------------------------
+' -----------------------------------------------------
 ' Writes the string (ft_string) into the file (ft_file)
 ' which might be a file object of a file's full name.
-' Note: ft_split is not used but specified for the
-'       declaration consistency with the Get Property.
-' ----------------------------------------------------
-    Const PROC = "TxtLet"
+' Note: ft_split is not used but specified to comply
+'       with the Get Property declaration.
+' -----------------------------------------------------
+    Const PROC = "Txt-Let"
     
     On Error GoTo eh
     Dim fso As New FileSystemObject
