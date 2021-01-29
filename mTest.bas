@@ -7,7 +7,7 @@ Option Explicit
 
 Private Property Let Status(ByVal s As String)
     If s <> vbNullString Then
-        Application.StatusBar = "regression test mFile: " & s
+        Application.StatusBar = "Regression test " & ThisWorkbook.name & " module 'mFile': " & s
     Else
         Application.StatusBar = vbNullString
     End If
@@ -39,6 +39,7 @@ Public Sub Regression()
     mTest.Test_08_Arry_Get
     mTest.Test_09_File_Differs
     mTest.Test_10_Txt
+    mTest.Test_11_Search
     Test_99_FileExists_NoFileObject_NoString ' Error AppErr(1) !
     
 xt: mErH.EoP ErrSrc(PROC)
@@ -359,8 +360,8 @@ Public Sub Test_09_File_Differs()
     sF2 = mFile.Temp
 
     ' Prepare
-    mFile.Txt(tx_file_full_name:=sF1, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
-    mFile.Txt(tx_file_full_name:=sF2, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
+    mFile.Txt(ft_file:=sF1, ft_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
+    mFile.Txt(ft_file:=sF2, ft_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
     Set f1 = fso.GetFile(sF1)
     Set f2 = fso.GetFile(sF2)
 
@@ -374,8 +375,8 @@ Public Sub Test_09_File_Differs()
     Debug.Assert dctDiff.Count = 0
 
     ' Test 2: Differs.Count = 1
-    mFile.Txt(tx_file_full_name:=sF1, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
-    mFile.Txt(tx_file_full_name:=sF2, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C" & vbCrLf & "D"
+    mFile.Txt(ft_file:=sF1, ft_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
+    mFile.Txt(ft_file:=sF2, ft_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C" & vbCrLf & "D"
     Set f1 = fso.GetFile(sF1)
     Set f2 = fso.GetFile(sF2)
     
@@ -390,8 +391,8 @@ Public Sub Test_09_File_Differs()
     Next i
     
     ' Test 3: Differs.Count = 1
-    mFile.Txt(tx_file_full_name:=sF1, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C" & vbCrLf & "D"
-    mFile.Txt(tx_file_full_name:=sF2, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
+    mFile.Txt(ft_file:=sF1, ft_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C" & vbCrLf & "D"
+    mFile.Txt(ft_file:=sF2, ft_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
     Set f1 = fso.GetFile(sF1)
     Set f2 = fso.GetFile(sF2)
     
@@ -406,8 +407,8 @@ Public Sub Test_09_File_Differs()
     Next i
     
     ' Test 4: Differs.Count = 1
-    mFile.Txt(tx_file_full_name:=sF1, tx_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
-    mFile.Txt(tx_file_full_name:=sF2, tx_append:=False) = "A" & vbCrLf & "X" & vbCrLf & "C"
+    mFile.Txt(ft_file:=sF1, ft_append:=False) = "A" & vbCrLf & "B" & vbCrLf & "C"
+    mFile.Txt(ft_file:=sF2, ft_append:=False) = "A" & vbCrLf & "X" & vbCrLf & "C"
     Set f1 = fso.GetFile(sF1)
     Set f2 = fso.GetFile(sF2)
     
@@ -442,29 +443,52 @@ Public Sub Test_10_Txt()
     Dim a()     As String
     Dim sSplit  As String
     Dim fso     As New FileSystemObject
+    Dim oFl     As File
     
     Status = ErrSrc(PROC)
+
+    '~~ Test 1: Write one recod
     sFl = mFile.Temp()
     sTest = "My string"
-
-    mFile.Txt(tx_file_full_name:=sFl _
-            , tx_append:=False _
+    mFile.Txt(ft_file:=sFl _
+            , ft_append:=False _
              ) = sTest
-    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
-    a = Split(sResult, sSplit)
-    Debug.Assert a(0) = sTest
-    If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
+    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
+    Debug.Assert Split(sResult, sSplit)(0) = sTest
+    fso.DeleteFile sFl
     
+    '~~ Test 2: Empty file
     sFl = mFile.Temp()
-    sTest = ""
-    mFile.Txt(tx_file_full_name:=sFl _
-            , tx_append:=False _
-             ) = ""
-    sResult = mFile.Txt(tx_file_full_name:=sFl, tx_split:=sSplit)
+    sTest = vbNullString
+    mFile.Txt(ft_file:=sFl, ft_append:=False) = sTest
+    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
     Debug.Assert sResult = vbNullString
+    fso.DeleteFile sFl
 
-xt: If fso.FileExists(sFl) Then fso.DeleteFile (sFl)
-    Set fso = Nothing
+    '~~ Test 3: Append
+    sFl = mFile.Temp()
+    mFile.Txt(ft_file:=sFl, ft_append:=False) = "AAA" & vbCrLf & "BBB"
+    mFile.Txt(ft_file:=sFl, ft_append:=True) = "CCC"
+    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
+    Debug.Assert Split(sResult, sSplit)(0) = "AAA"
+    Debug.Assert Split(sResult, sSplit)(1) = "BBB"
+    Debug.Assert Split(sResult, sSplit)(2) = "CCC"
+    fso.DeleteFile sFl
+
+    '~~ Test 4: Write with append and read with file as object
+    sFl = mFile.Temp()
+    fso.CreateTextFile Filename:=sFl
+    Set oFl = fso.GetFile(sFl)
+    sFl = oFl.Path
+    mFile.Txt(ft_file:=oFl, ft_append:=False) = "AAA" & vbCrLf & "BBB"
+    mFile.Txt(ft_file:=oFl, ft_append:=True) = "CCC"
+    sResult = mFile.Txt(ft_file:=oFl, ft_split:=sSplit)
+    Debug.Assert Split(sResult, sSplit)(0) = "AAA"
+    Debug.Assert Split(sResult, sSplit)(1) = "BBB"
+    Debug.Assert Split(sResult, sSplit)(2) = "CCC"
+    fso.DeleteFile sFl
+
+xt: Set fso = Nothing
     Exit Sub
 
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
@@ -482,14 +506,15 @@ Public Sub Test_11_Search()
     
     Status = ErrSrc(PROC)
     mErH.BoP ErrSrc(PROC)
+    
+    '~~ Test 1: Including subfolders, several files found
     Set cll = mFile.Search(fs_root:="e:\Ablage\Excel VBA\DevAndTest\Common" _
                          , fs_mask:="*CompMan*.frx" _
                          , fs_stop_after:=5 _
                           )
-    For Each v In cll
-        Debug.Print v
-    Next v
+    Debug.Assert cll.Count > 0
 
+    '~~ Test 2: Not including subfolders, no files found
     Set cll = mFile.Search(fs_root:="e:\Ablage\Excel VBA\DevAndTest\Common" _
                          , fs_mask:="*CompMan*.frx" _
                          , fs_stop_after:=5 _

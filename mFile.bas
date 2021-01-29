@@ -75,17 +75,14 @@ Private Declare PtrSafe Function GetPrivateProfileSectionNames _
 '                ByVal Size As Long, _
 '                ByVal name As String) As Long
 
-Private sSplitStr   As String
-
-Public Property Get SplitStr() As String:   SplitStr = sSplitStr:   End Property
-
-Private Property Let SplitStr(ByRef s As String)
-' ---------------------------------------------
-' Extract the kind of line break string in s.
-' ---------------------------------------------
-    If InStr(s, vbCrLf) <> 0 Then sSplitStr = vbCrLf _
-    Else If InStr(s, vbLf) <> 0 Then sSplitStr = vbLf _
-    Else If InStr(s, vbCr) <> 0 Then sSplitStr = vbCr
+Private Property Get SplitStr(ByRef s As String)
+' ----------------------------------------------
+' Returns the split string in string (s) used by
+' VBA.Split() to turn the string into an array.
+' ----------------------------------------------
+    If InStr(s, vbCrLf) <> 0 Then SplitStr = vbCrLf _
+    Else If InStr(s, vbLf) <> 0 Then SplitStr = vbLf _
+    Else If InStr(s, vbCr) <> 0 Then SplitStr = vbCr
 End Property
 
 Public Property Get Arry( _
@@ -159,13 +156,13 @@ Public Property Get SectionNames(Optional ByVal sn_file As String) As Dictionary
     
     On Error GoTo eh
     Dim asSections()    As String
-    Dim dct             As Dictionary
+    Dim Dct             As Dictionary
     Dim i               As Long
     Dim iLen            As Long
     Dim strBuffer       As String
     Dim sSectionName    As String
     
-    Set dct = New Dictionary
+    Set Dct = New Dictionary
     Set SectionNames = New Dictionary
     
     If Len(mFile.Txt(sn_file)) = 0 Then GoTo xt
@@ -184,42 +181,54 @@ Public Property Get SectionNames(Optional ByVal sn_file As String) As Dictionary
         For i = LBound(asSections) To UBound(asSections)
             sSectionName = asSections(i)
             If Len(sSectionName) <> 0 Then
-                If Not dct.Exists(sSectionName) _
-                Then mDct.DctAdd add_dct:=dct, add_key:=sSectionName, add_item:=sSectionName, add_seq:=seq_ascending
+                If Not Dct.Exists(sSectionName) _
+                Then mDct.DctAdd add_dct:=Dct, add_key:=sSectionName, add_item:=sSectionName, add_seq:=seq_ascending
             End If
         Next i
     End If
     
-xt: Set SectionNames = dct
+xt: Set SectionNames = Dct
     Exit Property
     
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
 Public Property Get Txt( _
-         Optional ByVal tx_file_full_name As String, _
-         Optional ByVal tx_append As Boolean = True, _
-         Optional ByRef tx_split As String = vbCrLf) As String
-' ----------------------------------------------------------
-' Returns the content of the text file (tx_file_full_name)
-' as string plus the line split character/string (tx_split).
-' ----------------------------------------------------------
+         Optional ByVal ft_file As Variant, _
+         Optional ByVal ft_append As Boolean = True, _
+         Optional ByRef ft_split As String) As String
+' ----------------------------------------------------
+' Returns text file's (ft_file_full_name) conten as
+' string with VBA.Split string (ft_split).
+' ----------------------------------------------------
     Const PROC = "TxtGet"
     
     On Error GoTo eh
-    Dim fso As New FileSystemObject
-    Dim ts  As TextStream
-    Dim s   As String
+    Dim fso     As New FileSystemObject
+    Dim ts      As TextStream
+    Dim s       As String
+    Dim sSplit  As String
+    Dim sFl As String
+   
+    ft_split = ft_split  ' not used! for declaration compliance and dead code check only
+    ft_append = ft_append ' not used! for declaration compliance and dead code check only
     
-    tx_append = tx_append ' not used! just for the synch with the Let property
-    If Not fso.FileExists(tx_file_full_name) _
-    Then Err.Raise AppErr(1), ErrSrc(PROC), "The file '" & tx_file_full_name & "' does not exist!"
-
-    Set ts = fso.OpenTextFile(Filename:=tx_file_full_name, IOMode:=ForReading)
+    With fso
+        If TypeName(ft_file) = "File" Then
+            sFl = ft_file.Path
+        Else
+            '~~ ft_file is regarded a file's full name, created if not existing
+            sFl = ft_file
+            If Not .FileExists(sFl) _
+            Then Err.Raise AppErr(1), ErrSrc(PROC), "The file '" & sFl & "' does not exist!"
+        End If
+        Set ts = .OpenTextFile(Filename:=sFl, IOMode:=ForReading)
+    End With
+    
     If Not ts.AtEndOfStream Then
         s = ts.ReadAll
-        SplitStr = s
-        tx_split = SplitStr
+        sSplit = SplitStr(s)
+        ft_split = sSplit
         If VBA.Right$(s, 2) = vbCrLf Then
             s = VBA.Left$(s, Len(s) - 2)
         End If
@@ -234,34 +243,39 @@ eh: ErrMsg ErrSrc(PROC)
 End Property
 
 Public Property Let Txt( _
-         Optional ByVal tx_file_full_name As String, _
-         Optional ByVal tx_append As Boolean = True, _
-         Optional ByRef tx_split As String, _
-                  ByVal tx_string As String)
-' -------------------------------------------------------
-' Write the test string (tx_string) to the file
-' (tx_file_full_name) optionally appended.
-' -------------------------------------------------------
+         Optional ByVal ft_file As Variant, _
+         Optional ByVal ft_append As Boolean = True, _
+         Optional ByRef ft_split As String, _
+                  ByVal ft_string As String)
+' ----------------------------------------------------
+' Writes the string (ft_string) into the file (ft_file)
+' which might be a file object of a file's full name.
+' Note: ft_split is not used but specified for the
+'       declaration consistency with the Get Property.
+' ----------------------------------------------------
     Const PROC = "TxtLet"
     
     On Error GoTo eh
     Dim fso As New FileSystemObject
     Dim ts  As TextStream
-    
-    tx_split = tx_split ' not used! just for coincidence with Get
+    Dim sFl As String
+   
+    ft_split = ft_split ' not used! just for coincidence with Get
     With fso
-        If tx_append Then
-            If Not .FileExists(tx_file_full_name) Then .CreateTextFile tx_file_full_name
-            Set ts = .OpenTextFile(tx_file_full_name, IOMode:=ForAppending)
+        If TypeName(ft_file) = "File" Then
+            sFl = ft_file.Path
         Else
-            If .FileExists(tx_file_full_name) Then .DeleteFile (tx_file_full_name)
-            .CreateTextFile tx_file_full_name
-            Set ts = .OpenTextFile(Filename:=tx_file_full_name _
-                                 , IOMode:=ForWriting _
-                                  )
+            '~~ ft_file is regarded a file's full name, created if not existing
+            sFl = ft_file
+            If Not .FileExists(sFl) Then .CreateTextFile sFl
         End If
+        
+        If ft_append _
+        Then Set ts = .OpenTextFile(Filename:=sFl, IOMode:=ForAppending) _
+        Else Set ts = .OpenTextFile(Filename:=sFl, IOMode:=ForWriting)
     End With
-    ts.WriteLine tx_string
+    
+    ts.WriteLine ft_string
 
 xt: ts.Close
     Set fso = Nothing
@@ -671,7 +685,6 @@ Public Function Differs( _
     Dim s2          As String
     Dim a1          As Variant
     Dim a2          As Variant
-    Dim vLines      As Variant
     Dim dctF1       As New Dictionary
     Dim dctF2       As New Dictionary
     
@@ -685,22 +698,28 @@ Public Function Differs( _
     Dim sFile1      As String
     Dim sFile2      As String
     Dim v           As Variant
+    Dim sSplit      As String
     
     Set dctDif = New Dictionary
     sFile1 = dif_file1.Path
     sFile2 = dif_file2.Path
     
-    s1 = mFile.Txt(tx_file_full_name:=sFile1)
-    s2 = mFile.Txt(tx_file_full_name:=sFile2)
+    s1 = mFile.Txt(ft_file:=sFile1, ft_split:=sSplit)
+    If dif_ignore_empty_records Then
+        '~~ Eliminate empty records
+        sTest1 = VBA.Replace$(s1, sSplit & sSplit, sSplit)
+    End If
+    
+    s2 = mFile.Txt(ft_file:=sFile2, ft_split:=sSplit)
+    If dif_ignore_empty_records Then
+        '~~ Eliminate empty records
+        sTest2 = VBA.Replace$(s2, sSplit & sSplit, sSplit)
+    End If
+    
     If VBA.StrComp(s1, s2, dif_compare) = 0 Then GoTo xt
 
-    If dif_ignore_empty_records Then
-        sTest1 = VBA.Replace$(s1, sSplitStr & sSplitStr, sSplitStr)
-        sTest2 = VBA.Replace$(s2, sSplitStr & sSplitStr, sSplitStr)
-        If VBA.StrComp(sTest1, sTest2, dif_compare) = 0 Then GoTo xt
-    End If
      
-    a1 = Split(s1, sSplitStr)
+    a1 = Split(s1, sSplit)
     For i = LBound(a1) To UBound(a1)
         dctF1.Add i + 1, a1(i)
         If dif_ignore_empty_records Then
@@ -712,7 +731,7 @@ Public Function Differs( _
         End If
     Next i
     
-    a2 = Split(s2, sSplitStr)
+    a2 = Split(s2, sSplit)
     For i = LBound(a2) To UBound(a2)
         dctF2.Add i + 1, a2(i)
         If dif_ignore_empty_records Then
@@ -723,7 +742,7 @@ Public Function Differs( _
             dct2.Add i + 1, a2(i)
         End If
     Next i
-    If VBA.StrComp(Join(dct1.Items(), sSplitStr), Join(dct2.Items(), sSplitStr), dif_compare) = 0 Then GoTo xt
+    If VBA.StrComp(Join(dct1.Items(), sSplit), Join(dct2.Items(), sSplit), dif_compare) = 0 Then GoTo xt
     
     '~~ Get and detect the difference by comparing the items one by one
     '~~ and optaining the line number from the Dictionary when different
@@ -866,26 +885,16 @@ xt: Set cll = Nothing
 eh: ErrMsg ErrSrc(PROC)
 End Sub
 
-Private Function ArrayIsAllocated(arr As Variant) As Boolean
-    
-    On Error Resume Next
-    ArrayIsAllocated = _
-    IsArray(arr) _
-    And Not IsError(LBound(arr, 1)) _
-    And LBound(arr, 1) <= UBound(arr, 1)
-    
-End Function
-
 Public Function SectionsGet( _
                       ByVal sg_file As String, _
              Optional ByVal sg_section_names As Variant) As Dictionary
-' -----------------------------------------------------------------------
+' --------------------------------------------------------------------
 ' Returns a Dictionary with complete sections, one for each provided
-' section name (sg_section_names). Each section is identified by the key
-' and the item is a Dictionary of all values - with the value name as
-' the key and the value as the item.
-' Recursively called until the sg_section_names argument is a Collection.
-' -----------------------------------------------------------------------
+' section name (sg_section_names). Each section is identified by the
+' key and the item is a Dictionary of all values - with the value name
+' as the key and the value as the item. The function is recursively
+' called to turn the sg_section_names argument into a Collection.
+' --------------------------------------------------------------------
     Const PROC = "SectionGet"
     
     On Error GoTo eh
@@ -1106,75 +1115,7 @@ Public Function ShellRun(sCmd As String) As String
 
 End Function
 
-Public Function ToArray(ByVal ta_file As Variant, _
-               Optional ByVal ta_exclude_empty_records As Boolean = False) As String()
-' ------------------------------------------------------------------------------------
-' Returns the content of the file (vFile) - which may be provided as file object or
-' full file name - as array by considering any kind of line break characters.
-' ------------------------------------------------------------------------------------
-    Const PROC  As String = "ToArray"
-    
-    On Error GoTo eh
-    Dim ts      As TextStream
-    Dim a       As Variant
-    Dim a1()    As String
-    Dim sSplit  As String
-    Dim fso     As File
-    Dim sFile   As String
-    Dim i       As Long
-    Dim j       As Long
-    
-    If Not Exists(ta_file, fso) _
-    Then Err.Raise AppErr(1), ErrSrc(PROC), "The file object (vFile) does not exist!"
-    
-    '~~ Unload file into a test stream
-    With New FileSystemObject
-        Set ts = .OpenTextFile(fso.Path, 1)
-        With ts
-            On Error Resume Next ' may be empty
-            sFile = .ReadAll
-            .Close
-        End With
-    End With
-    
-    If sFile = vbNullString Then GoTo xt
-    
-    '~~ Get the kind of line break used
-    If InStr(sFile, vbCr) <> 0 Then sSplit = vbCr
-    If InStr(sFile, vbLf) <> 0 Then sSplit = sSplit & vbLf
-    
-    '~~ Test stream to array
-    a = Split(sFile, sSplit)
-    
-    '~~ Remove any leading or trailing empty items
-    mBasic.ArrayTrimm a
-    
-    If Not ta_exclude_empty_records Then
-        ToArray = a
-    Else
-        '~~ Count empty records
-        j = 0
-        For i = LBound(a) To UBound(a)
-            If Len(Trim$(a(i))) = 0 Then j = j + 1
-        Next i
-        j = UBound(a) - j
-        ReDim a1(j - 1)
-        j = 0
-        For i = LBound(a) To UBound(a)
-            If Len(Trim$(a(i))) > 0 Then
-                a1(j) = a(i)
-                j = j + 1
-            End If
-        Next i
-        ToArray = a1
-    End If
-    
-xt: Exit Function
-    
-eh: ErrMsg ErrSrc(PROC)
-End Function
-
-Public Function ToDict(ByVal td_file As Variant) As Dictionary
+Public Property Get Dct(ByVal td_file As Variant) As Dictionary
 ' ----------------------------------------------------------
 ' Returns the content of the file (td_file) - which may be
 ' provided as file object or full file name - as Dictionary
@@ -1185,7 +1126,7 @@ Public Function ToDict(ByVal td_file As Variant) As Dictionary
     On Error GoTo eh
     Dim ts      As TextStream
     Dim a       As Variant
-    Dim dct     As New Dictionary
+    Dim dctFile As New Dictionary
     Dim sSplit  As String
     Dim fso     As File
     Dim sFile   As String
@@ -1217,14 +1158,14 @@ Public Function ToDict(ByVal td_file As Variant) As Dictionary
     mBasic.ArrayTrimm a
     
     For i = LBound(a) To UBound(a)
-        dct.Add i + 1, a(i)
+        dctFile.Add i + 1, a(i)
     Next i
         
-xt: Set ToDict = dct
-    Exit Function
+xt: Set Dct = dctFile
+    Exit Property
     
 eh: ErrMsg ErrSrc(PROC)
-End Function
+End Property
 
 Public Function ValueNames( _
                      ByVal vn_file As String, _
