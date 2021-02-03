@@ -1,15 +1,29 @@
 Attribute VB_Name = "mTest"
 Option Explicit
-' ------------------------------------------------------------
-' Standard Module mTest
-' Test of all services of the module.
-' -----------------------------------------------------------
+' ----------------------------------------------------------------
+' Standard Module mTest: Test of all services of the module.
+'
+' Attention! To run a complete Regression_PrivateProfile test
+'            requires the Conditional Compile Argument 'Testt = 1'
+' ----------------------------------------------------------------
 
 Private Const SECTION_NAME = "Section-" ' for PrivateProfile services test
 Private Const VALUE_NAME = "-Name-"     ' for PrivateProfile services test
 Private Const VALUE_STRING = "-Value-"  ' for PrivateProfile services test
     
 Private cllTestFiles    As Collection
+
+Private Property Get SectionName(Optional ByVal l As Long)
+    SectionName = SECTION_NAME & Format(l, "00")
+End Property
+
+Private Property Get ValueName(Optional ByVal lS As Long, Optional ByVal lV As Long)
+    ValueName = SECTION_NAME & Format(lS, "00") & VALUE_NAME & Format(lV, "00")
+End Property
+
+Private Property Get ValueString(Optional ByVal lS As Long, Optional ByVal lV As Long)
+    ValueString = SECTION_NAME & Format(lS, "00") & VALUE_STRING & Format(lV, "00")
+End Property
 
 Private Property Let Status(ByVal s As String)
     If s <> vbNullString Then
@@ -162,23 +176,17 @@ Private Function TestFileWithSections( _
 ' Returns the name of a temporary test file with (ts_sections) sections
 ' with (ts_values) values each.
 ' ---------------------------------------------------------------------
-    Dim sSect   As String
-    Dim sName   As String
-    Dim sValue  As String
     Dim i       As Long
     Dim j       As Long
     Dim sFile   As String
     
     sFile = mFile.Temp(tmp_extension:=".dat")
     For i = ts_sections To 1 Step -1
-        sSect = ts_section_name & i
         For j = ts_values To 1 Step -1
-            sName = sSect & ts_value_name & j
-            sValue = sSect & ts_value & j
             mFile.Value(pp_file:=sFile _
-                      , pp_section:=sSect _
-                      , pp_value_name:=sName _
-                       ) = sValue
+                      , pp_section:=SectionName(i) _
+                      , pp_value_name:=ValueName(i, j) _
+                       ) = ValueString(i, j)
         Next j
     Next i
     TestFileWithSections = sFile
@@ -669,17 +677,17 @@ Public Sub Test_52_File_Value()
         
     mErH.BoP ErrSrc(PROC)
     
-    '~~ Test 1: Write commented values
-    mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-1") = "Test Value"
-    mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-2") = True
-    mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-3") = False
-    mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-4") = cyValue
+    '~~ Test 1: Write values
+    mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 1)) = ValueString(1, 1)
+    mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 2)) = ValueString(1, 2)
+    mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 1)) = ValueString(2, 1)
+    mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 2)) = cyValue
     
     '~~ Test 2: Assert written values
-    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-1") = "Test Value"
-    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-2") = True
-    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-3") = False
-    cyResult = mFile.Value(pp_file:=sFile, pp_section:="Test", pp_value_name:="Test.Value-4")
+    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 1)) = ValueString(1, 1)
+    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 2)) = ValueString(1, 2)
+    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 1)) = ValueString(2, 1)
+    cyResult = mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 2))
     Debug.Assert cyResult = cyValue
     Debug.Assert VarType(cyResult) = vbCurrency
     
@@ -697,7 +705,7 @@ End Sub
 
 Public Sub Test_53_File_Values()
     Const PROC = "Test_53_File_Values"
-    
+#If Test Then
     On Error GoTo eh
     Dim dct         As Dictionary
     Dim v           As Variant
@@ -705,31 +713,28 @@ Public Sub Test_53_File_Values()
     Dim fso         As New FileSystemObject
     Dim sSection    As String
     
-    sFile = TestFileWithSections(ts_section_name:=SECTION_NAME _
-                       , ts_value_name:=VALUE_NAME _
-                       , ts_value:=VALUE_STRING _
-                       , ts_sections:=3 _
-                       , ts_values:=3 _
+    sFile = TestFileWithSections( _
+                               , ts_sections:=3 _
+                               , ts_values:=3 _
                         )
     
     mErH.BoP ErrSrc(PROC)
 
     '~~ Test 1: All values of one section
-    sSection = SECTION_NAME & 1
     Set dct = mFile.Values(pp_file:=sFile _
-                         , pp_sections:=sSection _
+                         , pp_sections:=SectionName(1) _
                           )
     '~~ Test 1: Assert the content of the result Dictionary
     Debug.Assert dct.Count = 3
-    Debug.Assert dct.Keys()(0) = sSection & VALUE_STRING & 1
-    Debug.Assert dct.Keys()(1) = sSection & VALUE_STRING & 2
-    Debug.Assert dct.Keys()(2) = sSection & VALUE_STRING & 3
+    Debug.Assert dct.Keys()(0) = ValueString(1, 1)
+    Debug.Assert dct.Keys()(1) = ValueString(1, 2)
+    Debug.Assert dct.Keys()(2) = ValueString(1, 3)
     '~~ Attention! There may be more value names for a value when the same value appears in several sections under a different value name!
     '~~            Thus, the names are returned as Collection. When the values are from one specific section there will be only one name
     '~~            in the item=collection
-    Debug.Assert dct.Items()(0)(1) = sSection & VALUE_NAME & 1
-    Debug.Assert dct.Items()(1)(1) = sSection & VALUE_NAME & 2
-    Debug.Assert dct.Items()(2)(1) = sSection & VALUE_NAME & 3
+    Debug.Assert dct.Items()(0)(1) = ValueName(1, 1)
+    Debug.Assert dct.Items()(1)(1) = ValueName(1, 2)
+    Debug.Assert dct.Items()(2)(1) = ValueName(1, 3)
     
     '~~ Test 2: All values of all section
     Set dct = mFile.Values(sFile) ' all sections is the default when no name is provided via the pp_sections argument
@@ -746,23 +751,22 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt2ResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
+#End If
 End Sub
 
 Public Sub Test_54_File_ValueNames()
     Const PROC = "Test_54_File_ValueNames"
-
+#If Test Then
     On Error GoTo eh
     Dim v       As Variant
     Dim sFile   As String
     Dim dct     As Dictionary
     Dim fso     As New FileSystemObject
     
-    sFile = TestFileWithSections(ts_section_name:=SECTION_NAME _
-                       , ts_value_name:=VALUE_NAME _
-                       , ts_value:=VALUE_STRING _
-                       , ts_sections:=3 _
-                       , ts_values:=3 _
-                        )
+    sFile = TestFileWithSections( _
+                                 ts_sections:=3 _
+                               , ts_values:=3 _
+                                )
     
     mErH.BoP ErrSrc(PROC)
     Set dct = mFile.ValueNames(sFile)
@@ -778,30 +782,29 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt2ResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
+#End If
 End Sub
 
 Public Sub Test_55_File_SectionNames()
     Const PROC = "Test_55_File_SectionNames"
-    
+#If Test Then
     On Error GoTo eh
     Dim v       As Variant
     Dim sFile   As String
     Dim fso     As New FileSystemObject
     Dim dct     As Dictionary
     
-    sFile = TestFileWithSections(ts_section_name:=SECTION_NAME _
-                       , ts_value_name:=VALUE_NAME _
-                       , ts_value:=VALUE_STRING _
-                       , ts_sections:=3 _
-                       , ts_values:=3 _
-                        )
+    sFile = TestFileWithSections( _
+                                 ts_sections:=3 _
+                               , ts_values:=3 _
+                                )
     
     mErH.BoP ErrSrc(PROC)
     Set dct = mFile.SectionNames(sFile)
     Debug.Assert dct.Count = 3
-    Debug.Assert dct.Items()(0) = SECTION_NAME & 1
-    Debug.Assert dct.Items()(1) = SECTION_NAME & 2
-    Debug.Assert dct.Items()(2) = SECTION_NAME & 3
+    Debug.Assert dct.Items()(0) = SectionName(1)
+    Debug.Assert dct.Items()(1) = SectionName(2)
+    Debug.Assert dct.Items()(2) = SectionName(3)
 
 xt: mErH.EoP ErrSrc(PROC)
     TestFilesRemove
@@ -814,6 +817,7 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt2ResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
+#End If
 End Sub
 
 Public Sub Test_56_File_PrivateProperty_Exists()
@@ -826,46 +830,44 @@ Public Sub Test_56_File_PrivateProperty_Exists()
     Dim sFile   As String
     
     '~~ Test preparation
-    sFile = TestFileWithSections(ts_section_name:=SECTION_NAME _
-                               , ts_value_name:=VALUE_NAME _
-                               , ts_value:=VALUE_STRING _
+    sFile = TestFileWithSections( _
                                , ts_sections:=10 _
                                , ts_values:=3 _
                                 )
     mErH.BoP ErrSrc(PROC)
     '~~ Section by name in file
     Debug.Assert mFile.SectionExists(pp_file:=sFile _
-                                  , pp_section:=SECTION_NAME & 9 _
+                                  , pp_section:=SectionName(9) _
                                     )
     '~~ Value name in any section
     Debug.Assert mFile.ValueNameExists(pp_file:=sFile _
-                                  , pp_valuename:=SECTION_NAME & 9 & VALUE_NAME & 3 _
+                                  , pp_valuename:=ValueName(9, 3) _
                                     )
     '~~ Value name in a named section
     Debug.Assert mFile.ValueNameExists(pp_file:=sFile _
-                                     , pp_sections:=SECTION_NAME & 7 _
-                                     , pp_valuename:=SECTION_NAME & 7 & VALUE_NAME & 3 _
+                                     , pp_sections:=SectionName(7) _
+                                     , pp_valuename:=ValueName(7, 3) _
                                       )
     '~~ Value name not in named section
     Debug.Assert Not mFile.ValueNameExists(pp_file:=sFile _
-                                         , pp_sections:=SECTION_NAME & 7 _
-                                         , pp_valuename:=SECTION_NAME & 6 & VALUE_NAME & 3 _
-                                    )
+                                         , pp_sections:=SectionName(7) _
+                                         , pp_valuename:=ValueName(6, 3) _
+                                          )
     
     '~~ Value in any section
     Debug.Assert mFile.ValueExists(pp_file:=sFile _
-                                 , pp_value:=SECTION_NAME & 9 & VALUE_STRING & 3 _
+                                 , pp_value:=ValueString(8, 3) _
                                   )
     
     '~~ Value in named section
     Debug.Assert mFile.ValueExists(pp_file:=sFile _
-                                 , pp_sections:=SECTION_NAME & 7 _
-                                 , pp_value:=SECTION_NAME & 7 & VALUE_STRING & 3 _
+                                 , pp_sections:=SectionName(7) _
+                                 , pp_value:=ValueString(7, 3) _
                                   )
     '~~ Value not in named section
     Debug.Assert Not mFile.ValueExists(pp_file:=sFile _
-                                     , pp_sections:=SECTION_NAME & 7 _
-                                     , pp_value:=SECTION_NAME & 2 & VALUE_STRING & 3 _
+                                     , pp_sections:=SectionName(7) _
+                                     , pp_value:=ValueString(6, 3) _
                                       )
 xt: mErH.EoP ErrSrc(PROC)
     TestFilesRemove
@@ -886,7 +888,7 @@ Public Sub Test_60_File_SectionsCopy()
 ' - mFile.Sections Get and Let
 ' ------------------------------------------------
     Const PROC = "Test_60_File_SectionsCopy"
-    
+#If Test Then
     On Error GoTo eh
     Dim fso             As New FileSystemObject
     Dim sFileGet        As String
@@ -898,12 +900,10 @@ Public Sub Test_60_File_SectionsCopy()
     Dim dct             As Dictionary
     
     '~~ Test preparation
-    sFileGet = TestFileWithSections(ts_section_name:=SECTION_NAME _
-                          , ts_value_name:=VALUE_NAME _
-                          , ts_value:=VALUE_STRING _
-                          , ts_sections:=20 _
-                          , ts_values:=10 _
-                           )
+    sFileGet = TestFileWithSections( _
+                                    ts_sections:=20 _
+                                  , ts_values:=10 _
+                                    )
     mErH.BoP ErrSrc(PROC)
     
     '~~ Test 1: Copy the first section only
@@ -916,7 +916,7 @@ Public Sub Test_60_File_SectionsCopy()
     '~~ Test 1: Assert result
     Set dct = mFile.SectionNames(sFileLet)
     Debug.Assert dct.Count = 1
-    Debug.Assert dct.Keys()(0) = SECTION_NAME & 1
+    Debug.Assert dct.Keys()(0) = SectionName(1)
     fso.DeleteFile sFileLet
     
     
@@ -927,21 +927,21 @@ Public Sub Test_60_File_SectionsCopy()
     
     '~~ Test 2: Assert result
     Set dct = mFile.SectionNames(sFileLet)
-    Debug.Assert dct.Count = 50
-    Debug.Assert dct.Keys()(0) = SECTION_NAME & 1
-    Debug.Assert dct.Keys()(1) = SECTION_NAME & 2
-    Debug.Assert dct.Keys()(2) = SECTION_NAME & 3
+    Debug.Assert dct.Count = 20
+    Debug.Assert dct.Keys()(0) = SectionName(1)
+    Debug.Assert dct.Keys()(1) = SectionName(2)
+    Debug.Assert dct.Keys()(2) = SectionName(3)
     fso.DeleteFile sFileLet
        
     '~~ Test 3: Order sections in ascending sequence
-    Debug.Assert mFile.Arry(sFileGet)(0) = "[Section-20]"
+    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & SectionName(20) & "]"
     
     mFile.SectionsCopy pp_source:=sFileGet _
                      , pp_target:=sFileGet _
                      , pp_replace:=True ' essential to get them re-ordered in ascending sequence
     
     '~~ Test 3: Assert result
-    Debug.Assert mFile.Arry(sFileGet)(0) = "[Section-1]"
+    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & SectionName(1) & "]"
             
 xt: mErH.EoP ErrSrc(PROC)
     TestFilesRemove
@@ -953,6 +953,7 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOpt2ResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
+#End If
 End Sub
 
 Public Sub Test_99_FileExists_NoFileObject_NoString()

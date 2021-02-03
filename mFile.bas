@@ -119,7 +119,6 @@ Public Property Get Arry( _
     
     On Error GoTo eh
     Dim cll     As New Collection
-    Dim ts      As TextStream
     Dim a       As Variant
     Dim a1()    As String
     Dim sSplit  As String
@@ -196,8 +195,13 @@ Public Function SectionExists( _
     SectionExists = mFile.SectionNames(pp_file).Exists(pp_section)
 End Function
 
+#If Test Then
 Public Function SectionNames( _
               Optional ByVal pp_file As String) As Dictionary
+#Else
+Private Function SectionNames( _
+              Optional ByVal pp_file As String) As Dictionary
+#End If
 ' -----------------------------------------------------------
 ' Returns a Dictionary of all section names [.....] in file
 ' (pp_file) in ascending sequence.
@@ -214,7 +218,6 @@ Public Function SectionNames( _
     Dim i               As Long
     Dim iLen            As Long
     Dim strBuffer       As String
-    Dim v               As Variant
     
     If Len(mFile.Txt(pp_file)) = 0 Then GoTo xt
     If Not fso.FileExists(pp_file) Then GoTo xt
@@ -917,7 +920,6 @@ Public Sub SectionsCopy(ByVal pp_source As String, _
     On Error GoTo eh
     Dim fso         As New FileSystemObject
     Dim dct         As Dictionary
-    Dim dctSections As Dictionary
     Dim vNames      As Variant
     
     '~~ Provide all section names when no section named are provided via pp_sections
@@ -943,10 +945,17 @@ xt: Set vNames = Nothing
 eh: ErrMsg ErrSrc(PROC)
 End Sub
 
+#If Test Then
+Public Property Get Sections( _
+                   Optional ByVal pp_file As String, _
+                   Optional ByVal pp_sections As Variant = Nothing, _
+                   Optional ByVal pp_replace As Boolean = False) As Dictionary
+#Else
 Private Property Get Sections( _
                    Optional ByVal pp_file As String, _
                    Optional ByVal pp_sections As Variant = Nothing, _
                    Optional ByVal pp_replace As Boolean = False) As Dictionary
+#End If
 ' ----------------------------------------------------------------------------
 ' Returns the named sections (pp_section_names) - if not provided all sections - in
 ' file (pp_file) as Dictionary with the section name as the key - in ascending order! -
@@ -960,10 +969,8 @@ Private Property Get Sections( _
     Const PROC = "Sections-Get"
     
     On Error GoTo eh
-    Dim cll     As Collection       ' Section names
     Dim dctS    As New Dictionary   ' Result Sections
     Dim dctV    As Dictionary       ' Section values
-    Dim dctN    As Dictionary       ' Section names
     Dim v       As Variant
     Dim sName   As String           ' A section's name
     Dim vNames  As Variant
@@ -993,11 +1000,19 @@ xt: Set Sections = dctS
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
+#If Test Then
+Public Property Let Sections( _
+              Optional ByVal pp_file As String, _
+              Optional ByVal pp_sections As Variant = Nothing, _
+              Optional ByVal pp_replace As Boolean = False, _
+                       ByVal pp_dct As Dictionary)
+#Else
 Private Property Let Sections( _
               Optional ByVal pp_file As String, _
               Optional ByVal pp_sections As Variant = Nothing, _
               Optional ByVal pp_replace As Boolean = False, _
                        ByVal pp_dct As Dictionary)
+#End If
 ' ------------------------------------------------------------------------
 ' Writes the sections in a Dictionary (pp_dct) to the file (pp_file) by
 ' default merging or by replacing existing sections.
@@ -1009,11 +1024,10 @@ Private Property Let Sections( _
     Dim vS          As Variant
     Dim dctValues   As Dictionary
     Dim sSection    As String
-    Dim vValue      As Variant
     Dim sName       As String
-    Dim cllNames    As Collection
     
-    pp_replace = pp_replace ' not used! declared for Property Get/Let conformity only
+    pp_replace = pp_replace     ' not used! declared for Property Get/Let conformity only
+    Set pp_sections = Nothing   ' not used! declared for Property Get/Let conformity only
     
     For Each vS In pp_dct
         sSection = vS
@@ -1032,7 +1046,7 @@ xt: Exit Property
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
-Public Function NamesInArg( _
+Private Function NamesInArg( _
             Optional ByVal v As Variant = Nothing) As Collection
 ' --------------------------------------------------------------
 ' Returns (v) as Collection of string items whereby (v) may not
@@ -1042,10 +1056,8 @@ Public Function NamesInArg( _
     Const PROC = "NamesInArg"
     
     On Error GoTo eh
-    Dim i       As Long
     Dim cll     As New Collection
     Dim dct     As Dictionary
-    Dim a       As Variant
     Dim vName   As Variant
     
     Select Case VarType(v)
@@ -1150,7 +1162,7 @@ xt: Exit Function
 eh: ErrMsg ErrSrc(PROC)
 End Function
 
-Public Function ShellRun(sCmd As String) As String
+Private Function ShellRun(sCmd As String) As String
 ' ------------------------------------------------------
 ' Run a shell command, returning the output as a string.
 ' ------------------------------------------------------
@@ -1227,9 +1239,15 @@ xt: Set Dict = dct
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
-Public Function ValueNames( _
-                     ByVal pp_file As String, _
-            Optional ByVal pp_sections As Variant = Nothing) As Dictionary
+#If Test Then
+    Public Function ValueNames( _
+                          ByVal pp_file As String, _
+                 Optional ByVal pp_sections As Variant = Nothing) As Dictionary
+#Else
+    Private Function ValueNames( _
+                          ByVal pp_file As String, _
+                 Optional ByVal pp_sections As Variant = Nothing) As Dictionary
+#End If
 ' ------------------------------------------------------------------------
 ' Returns a Dictionary of all value names (with the value name as key and
 ' the value as item) in file (pp_file) of the sections (pp_sections) in
@@ -1245,7 +1263,6 @@ Public Function ValueNames( _
     
     On Error GoTo eh
     Dim asNames()       As String
-    Dim cllNames        As New Collection
     Dim dctNames        As New Dictionary
     Dim i               As Long
     Dim lResult         As Long
@@ -1296,10 +1313,15 @@ xt: Set dctNames = Nothing
     
 eh: ErrMsg ErrSrc(PROC)
 End Function
-
+#If Test Then
 Public Function Values( _
                  ByVal pp_file As String, _
         Optional ByVal pp_sections As Variant = Nothing) As Dictionary
+#Else
+Private Function Values( _
+                 ByVal pp_file As String, _
+        Optional ByVal pp_sections As Variant = Nothing) As Dictionary
+#End If
 ' --------------------------------------------------------------------
 ' Returns a Dictionary with the values in file (pp_file) as key.
 ' Attention! Because the same value may appear with several names when
