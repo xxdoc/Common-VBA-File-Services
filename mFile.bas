@@ -6,7 +6,7 @@ Option Private Module
 ' Standard  Module mFile
 '           Common methods and functions regarding file objects.
 '
-' Methods:
+' Public services:
 ' - Exists          Returns TRUE when the file exists
 ' - Compare         Displays differences of two files by means of WinMerge
 ' - Differs         Returns a Dictionary with records which differ between two files
@@ -161,14 +161,50 @@ xt: Arry = a1
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
-Public Property Get SectionNames( _
-                  Optional ByVal pp_file As String) As Dictionary
-' ---------------------------------------------------------------
+Public Function ValueExists( _
+                          ByVal pp_file As String, _
+                          ByVal pp_value As Variant, _
+                 Optional ByVal pp_sections As Variant = Nothing) As Boolean
+' --------------------------------------------------------------------------
+' Returns True when the value (pp_value) exists in file (pp_file) - when no
+' section name is provided in any section, else in the given sections.
+' Section names (pp_sections) may be provided as comma delimited string or
+' as Dictionary or Collection with name items.
+' --------------------------------------------------------------------------
+    ValueExists = mFile.Values(pp_file, pp_sections).Exists(pp_value)
+End Function
+
+Public Function ValueNameExists( _
+                          ByVal pp_file As String, _
+                          ByVal pp_valuename As String, _
+                 Optional ByVal pp_sections As Variant = Nothing) As Boolean
+' --------------------------------------------------------------------------
+' Returns True when the value name (pp_valuename) exists in file (pp_file)
+' - when no section name is provided in any section, else in the given
+' sections. Section names (pp_sections) may be provided as comma delimited
+' string or as Dictionary or Collection with name items.
+' -------------------------------------------------------------------------
+    ValueNameExists = mFile.ValueNames(pp_file, pp_sections).Exists(pp_valuename)
+End Function
+                 
+Public Function SectionExists( _
+                        ByVal pp_file As String, _
+                        ByVal pp_section As String) As Boolean
+' --------------------------------------------------------------------
+' Returns True when the section (pp_section) exists in file (pp_file).
+' --------------------------------------------------------------------
+    SectionExists = mFile.SectionNames(pp_file).Exists(pp_section)
+End Function
+
+Public Function SectionNames( _
+              Optional ByVal pp_file As String) As Dictionary
+' -----------------------------------------------------------
 ' Returns a Dictionary of all section names [.....] in file
 ' (pp_file) in ascending sequence.
 '
-' Uses: mDct.DctAdd to order the sections in ascending sequence.
-' ---------------------------------------------------------------
+' Uses: mDct.DctAdd to order the sections in ascending
+' sequence.
+' -----------------------------------------------------------
     Const PROC = "SectionNames"
     
     On Error GoTo eh
@@ -205,10 +241,10 @@ Public Property Get SectionNames( _
     
 xt: Set SectionNames = dct
     Set dct = Nothing
-    Exit Property
+    Exit Function
     
 eh: ErrMsg ErrSrc(PROC)
-End Property
+End Function
 
 Public Property Get Txt( _
          Optional ByVal ft_file As Variant, _
@@ -907,7 +943,7 @@ xt: Set vNames = Nothing
 eh: ErrMsg ErrSrc(PROC)
 End Sub
 
-Public Property Get Sections( _
+Private Property Get Sections( _
                    Optional ByVal pp_file As String, _
                    Optional ByVal pp_sections As Variant = Nothing, _
                    Optional ByVal pp_replace As Boolean = False) As Dictionary
@@ -957,7 +993,7 @@ xt: Set Sections = dctS
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
-Public Property Let Sections( _
+Private Property Let Sections( _
               Optional ByVal pp_file As String, _
               Optional ByVal pp_sections As Variant = Nothing, _
               Optional ByVal pp_replace As Boolean = False, _
