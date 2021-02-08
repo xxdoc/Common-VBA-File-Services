@@ -677,7 +677,13 @@ Public Sub Test_52_File_Value()
         
     mErH.BoP ErrSrc(PROC)
     
-    '~~ Test 1: Write values
+    '~~ Test 1: Read non-existing value from a non-existing file
+    Debug.Assert mFile.Value(pp_file:=sFile _
+                           , pp_section:="Any" _
+                           , pp_value_name:="Any" _
+                            ) = vbNullString
+    
+    '~~ Test 2: Write values
     mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 1)) = ValueString(1, 1)
     mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 2)) = ValueString(1, 2)
     mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 1)) = ValueString(2, 1)

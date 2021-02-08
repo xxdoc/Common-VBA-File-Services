@@ -255,7 +255,8 @@ Public Property Get Txt( _
          Optional ByRef ft_split As String) As String
 ' ----------------------------------------------------
 ' Returns the text file's (ft_file) content as string
-' with VBA.Split() string in (ft_split).
+' with VBA.Split() string in (ft_split). When the file
+' doesn't exist a vbNullString is returned.
 ' Note: ft_append is not used but specified to comply
 '       with the Get Property declaration.
 ' ----------------------------------------------------
@@ -276,8 +277,7 @@ Public Property Get Txt( _
         Else
             '~~ ft_file is regarded a file's full name, created if not existing
             sFl = ft_file
-            If Not .FileExists(sFl) _
-            Then Err.Raise AppErr(1), ErrSrc(PROC), "The file '" & sFl & "' does not exist!"
+            If Not .FileExists(sFl) Then GoTo xt
         End If
         Set ts = .OpenTextFile(Filename:=sFl, IOMode:=ForReading)
     End With
@@ -711,7 +711,7 @@ Public Property Get Temp( _
     Dim fso     As New FileSystemObject
     Dim sTemp   As String
     
-    If Left(tmp_extension, 1) <> "." Then tmp_extension = "." & tmp_extension
+    If VBA.Left$(tmp_extension, 1) <> "." Then tmp_extension = "." & tmp_extension
     sTemp = Replace(fso.GetTempName, ".tmp", tmp_extension)
     If tmp_path = vbNullString Then tmp_path = CurDir
     sTemp = VBA.Replace(tmp_path & "\" & sTemp, "\\", "\")
