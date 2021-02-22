@@ -283,7 +283,7 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
     ' Prepare
     Set wb = ThisWorkbook
     Set fsoFile = fso.GetFile(wb.FullName)
-    sWldCrd = VBA.left$(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
+    sWldCrd = VBA.Left$(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
     
     ' Test
     mErH.BoP ErrSrc(PROC), "fe_file:=", sWldCrd
