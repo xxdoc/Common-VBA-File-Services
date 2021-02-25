@@ -17,20 +17,20 @@ Private Property Get SectionName(Optional ByVal l As Long)
     SectionName = SECTION_NAME & Format(l, "00")
 End Property
 
-Private Property Get ValueName(Optional ByVal lS As Long, Optional ByVal lV As Long)
-    ValueName = SECTION_NAME & Format(lS, "00") & VALUE_NAME & Format(lV, "00")
-End Property
-
-Private Property Get ValueString(Optional ByVal lS As Long, Optional ByVal lV As Long)
-    ValueString = SECTION_NAME & Format(lS, "00") & VALUE_STRING & Format(lV, "00")
-End Property
-
 Private Property Let Status(ByVal s As String)
     If s <> vbNullString Then
         Application.StatusBar = "Regression test " & ThisWorkbook.name & " module 'mFile': " & s
     Else
         Application.StatusBar = vbNullString
     End If
+End Property
+
+Private Property Get ValueName(Optional ByVal lS As Long, Optional ByVal lV As Long)
+    ValueName = SECTION_NAME & Format(lS, "00") & VALUE_NAME & Format(lV, "00")
+End Property
+
+Private Property Get ValueString(Optional ByVal lS As Long, Optional ByVal lV As Long)
+    ValueString = SECTION_NAME & Format(lS, "00") & VALUE_STRING & Format(lV, "00")
 End Property
 
 Private Function ErrSrc(ByVal sProc As String) As String
@@ -82,6 +82,7 @@ Public Sub Regression_Other()
     sTestStatus = "mFile Regression-Other: "
 
     mErH.BoTP ErrSrc(PROC), mErH.AppErr(1) ' For the very last test on an error condition
+    mTest.Test_00_Temp
     mTest.Test_01_FileExists_Not
     mTest.Test_02_FileExists_ByObject
     mTest.Test_03_FileExists_ByFullName
@@ -89,11 +90,10 @@ Public Sub Regression_Other()
     mTest.Test_05_FileExists_ByFullName_WildCard_MoreThanOne
     mTest.Test_06_FileExists_WildCard_MoreThanOne_InSubFolder
     mTest.Test_07_SelectFile
-    mTest.Test_08_Arry_Get
+    mTest.Test_08_Txt_Let_Get
     mTest.Test_09_File_Differs
-    mTest.Test_10_Search
-    mTest.Test_11_Temp
-    mTest.Test_12_Txt
+    mTest.Test_10_Arry_Get_Let
+    mTest.Test_11_Search
     mTest.Test_99_FileExists_NoFileObject_NoString ' Error AppErr(1) !
     
 xt: mErH.EoP ErrSrc(PROC)
@@ -138,17 +138,6 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Private Function TestFileTemp() As String
-    Dim sFile   As String
-    
-    sFile = mFile.Temp(tmp_extension:=".dat")
-    TestFileTemp = sFile
-    
-    If cllTestFiles Is Nothing Then Set cllTestFiles = New Collection
-    cllTestFiles.Add sFile
-
-End Function
-
 Private Sub TestFilesRemove()
 
     Dim fso As New FileSystemObject
@@ -165,6 +154,17 @@ Private Sub TestFilesRemove()
     Set fso = Nothing
     
 End Sub
+
+Private Function TestFileTemp() As String
+    Dim sFile   As String
+    
+    sFile = mFile.Temp(tmp_extension:=".dat")
+    TestFileTemp = sFile
+    
+    If cllTestFiles Is Nothing Then Set cllTestFiles = New Collection
+    cllTestFiles.Add sFile
+
+End Function
 
 Private Function TestFileWithSections( _
                Optional ByVal ts_section_name As String = "Section-", _
@@ -194,6 +194,18 @@ Private Function TestFileWithSections( _
     cllTestFiles.Add sFile
     
 End Function
+
+Public Sub Test_00_Temp()
+    Const PROC = "Test_00_Temp"
+
+    Dim sTemp As String
+    
+    mErH.BoP ErrSrc(PROC)
+    sTemp = mFile.Temp(tmp_path:=ThisWorkbook.Path)
+    sTemp = mFile.Temp()
+    mErH.EoP ErrSrc(PROC)
+    
+End Sub
 
 Public Sub Test_01_FileExists_Not()
     Const PROC = "Test_01_FileExists_Not"
@@ -390,46 +402,64 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-  
-Public Sub Test_08_Arry_Get()
-    Const PROC = "Test_08_Arry_Get"
+Public Sub Test_08_Txt_Let_Get()
+    Const PROC = "Test_08_Txt_Let_Get"
     
     On Error GoTo eh
-    Dim sFile       As String
-    Dim lInclEmpty  As Long
-    Dim lEmpty1     As Long
-    Dim lExclEmpty  As Long
-    Dim lEmpty2     As Long
-    Dim fso         As New FileSystemObject
-    Dim a           As Variant
-    Dim v           As Variant
+    Dim sFl     As String
+    Dim sTest   As String
+    Dim sResult As String
+    Dim a()     As String
+    Dim sSplit  As String
+    Dim fso     As New FileSystemObject
+    Dim oFl     As File
     
     Status = ErrSrc(PROC)
-    mErH.BoP ErrSrc(PROC)
-    sFile = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
+
+    '~~ Test 1: Write one recod
+    sFl = mFile.Temp()
+    sTest = "My string"
+    mFile.Txt(ft_file:=sFl _
+            , ft_append:=False _
+             ) = sTest
+    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
+    Debug.Assert Split(sResult, sSplit)(0) = sTest
+    fso.DeleteFile sFl
     
-    sFile = mFile.Temp()
-    mFile.Txt(sFile) = "xxx" & vbCrLf & "" & "yyy"
-    
-    '~~ Count empty records when array contains all text lines
-    a = mFile.Arry(fa_file_full_name:=sFile, fa_exclude_empty_records:=False)
-    lInclEmpty = UBound(a) + 1
-    lEmpty1 = 0
-    For Each v In a
-        If VBA.Trim$(v) = vbNullString Then lEmpty1 = lEmpty1 + 1
-        If VBA.Len(Trim$(v)) = 0 Then lEmpty2 = lEmpty2 + 1
-    Next v
-    
-    '~~ Count empty records
-    a = mFile.Arry(fa_file_full_name:=sFile, fa_exclude_empty_records:=True)
-    lExclEmpty = UBound(a) + 1
-    Debug.Assert lExclEmpty = lInclEmpty - lEmpty1
-    
-xt: fso.DeleteFile sFile
-    Set fso = Nothing
-    mErH.EoP ErrSrc(PROC)
+    '~~ Test 2: Empty file
+    sFl = mFile.Temp()
+    sTest = vbNullString
+    mFile.Txt(ft_file:=sFl, ft_append:=False) = sTest
+    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
+    Debug.Assert sResult = vbNullString
+    fso.DeleteFile sFl
+
+    '~~ Test 3: Append
+    sFl = mFile.Temp()
+    mFile.Txt(ft_file:=sFl, ft_append:=False) = "AAA" & vbCrLf & "BBB"
+    mFile.Txt(ft_file:=sFl, ft_append:=True) = "CCC"
+    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
+    Debug.Assert Split(sResult, sSplit)(0) = "AAA"
+    Debug.Assert Split(sResult, sSplit)(1) = "BBB"
+    Debug.Assert Split(sResult, sSplit)(2) = "CCC"
+    fso.DeleteFile sFl
+
+    '~~ Test 4: Write with append and read with file as object
+    sFl = mFile.Temp()
+    fso.CreateTextFile Filename:=sFl
+    Set oFl = fso.GetFile(sFl)
+    sFl = oFl.Path
+    mFile.Txt(ft_file:=oFl, ft_append:=False) = "AAA" & vbCrLf & "BBB"
+    mFile.Txt(ft_file:=oFl, ft_append:=True) = "CCC"
+    sResult = mFile.Txt(ft_file:=oFl, ft_split:=sSplit)
+    Debug.Assert Split(sResult, sSplit)(0) = "AAA"
+    Debug.Assert Split(sResult, sSplit)(1) = "BBB"
+    Debug.Assert Split(sResult, sSplit)(2) = "CCC"
+    fso.DeleteFile sFl
+
+xt: Set fso = Nothing
     Exit Sub
-    
+
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOptResumeErrorLine: Stop: Resume
         Case mErH.DebugOptResumeNext: Resume Next
@@ -551,72 +581,75 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_12_Txt()
-    Const PROC = "Test_12_Txt"
+  
+Public Sub Test_10_Arry_Get_Let()
+    Const PROC = "Test_10_Arry_Get_Let"
     
     On Error GoTo eh
-    Dim sFl     As String
-    Dim sTest   As String
-    Dim sResult As String
-    Dim a()     As String
-    Dim sSplit  As String
-    Dim fso     As New FileSystemObject
-    Dim oFl     As File
+    Dim sFile1      As String
+    Dim sFile2      As String
+    Dim lInclEmpty  As Long
+    Dim lEmpty1     As Long
+    Dim lExclEmpty  As Long
+    Dim lEmpty2     As Long
+    Dim fso         As New FileSystemObject
+    Dim a           As Variant
+    Dim v           As Variant
     
     Status = ErrSrc(PROC)
-
-    '~~ Test 1: Write one recod
-    sFl = mFile.Temp()
-    sTest = "My string"
-    mFile.Txt(ft_file:=sFl _
-            , ft_append:=False _
-             ) = sTest
-    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
-    Debug.Assert Split(sResult, sSplit)(0) = sTest
-    fso.DeleteFile sFl
+    mErH.BoP ErrSrc(PROC)
+    sFile1 = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
+    sFile2 = "E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas"
     
-    '~~ Test 2: Empty file
-    sFl = mFile.Temp()
-    sTest = vbNullString
-    mFile.Txt(ft_file:=sFl, ft_append:=False) = sTest
-    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
-    Debug.Assert sResult = vbNullString
-    fso.DeleteFile sFl
+    sFile1 = mFile.Temp()
+    sFile2 = mFile.Temp()
+    
+    '~~ Write to lines to sFile1
+    mFile.Txt(sFile1) = "xxx" & vbCrLf & "" & "yyy"
+    
+    '~~ Get the two lines as Array
+    a = mFile.Arry(fa_file:=sFile1 _
+                 , fa_split:=vbCrLf _
+                  )
+    Debug.Assert a(LBound(a)) = "xxx"
+    Debug.Assert a(UBound(a)) = "yyy"
 
-    '~~ Test 3: Append
-    sFl = mFile.Temp()
-    mFile.Txt(ft_file:=sFl, ft_append:=False) = "AAA" & vbCrLf & "BBB"
-    mFile.Txt(ft_file:=sFl, ft_append:=True) = "CCC"
-    sResult = mFile.Txt(ft_file:=sFl, ft_split:=sSplit)
-    Debug.Assert Split(sResult, sSplit)(0) = "AAA"
-    Debug.Assert Split(sResult, sSplit)(1) = "BBB"
-    Debug.Assert Split(sResult, sSplit)(2) = "CCC"
-    fso.DeleteFile sFl
+    '~~ Write array to file-2
+    mFile.Arry(fa_file:=sFile2 _
+             , fa_split:=vbCrLf _
+              ) = a
+    Debug.Assert mFile.Differs(fso.GetFile(sFile1), fso.GetFile(sFile2)).Count = 0
 
-    '~~ Test 4: Write with append and read with file as object
-    sFl = mFile.Temp()
-    fso.CreateTextFile Filename:=sFl
-    Set oFl = fso.GetFile(sFl)
-    sFl = oFl.Path
-    mFile.Txt(ft_file:=oFl, ft_append:=False) = "AAA" & vbCrLf & "BBB"
-    mFile.Txt(ft_file:=oFl, ft_append:=True) = "CCC"
-    sResult = mFile.Txt(ft_file:=oFl, ft_split:=sSplit)
-    Debug.Assert Split(sResult, sSplit)(0) = "AAA"
-    Debug.Assert Split(sResult, sSplit)(1) = "BBB"
-    Debug.Assert Split(sResult, sSplit)(2) = "CCC"
-    fso.DeleteFile sFl
-
-xt: Set fso = Nothing
+    '~~ Count empty records when array contains all text lines
+    a = mFile.Arry(fa_file:=sFile1, fa_excl_empty_lines:=False)
+    lInclEmpty = UBound(a) + 1
+    lEmpty1 = 0
+    For Each v In a
+        If VBA.Trim$(v) = vbNullString Then lEmpty1 = lEmpty1 + 1
+        If VBA.Len(Trim$(v)) = 0 Then lEmpty2 = lEmpty2 + 1
+    Next v
+    
+    '~~ Count empty records
+    a = mFile.Arry(fa_file:=sFile1, fa_excl_empty_lines:=True)
+    lExclEmpty = UBound(a) + 1
+    Debug.Assert lExclEmpty = lInclEmpty - lEmpty1
+    
+xt: With fso
+        .DeleteFile sFile1
+        If .FileExists(sFile2) Then .DeleteFile sFile2
+    End With
+    Set fso = Nothing
+    mErH.EoP ErrSrc(PROC)
     Exit Sub
-
+    
 eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOptResumeErrorLine: Stop: Resume
         Case mErH.DebugOptResumeNext: Resume Next
     End Select
 End Sub
 
-Public Sub Test_10_Search()
-    Const PROC = "Test_10_Search"
+Public Sub Test_11_Search()
+    Const PROC = "Test_11_Search"
     
     On Error GoTo eh
     Dim cll As Collection
@@ -649,17 +682,6 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_11_Temp()
-    Const PROC = "Test_11_Temp"
-
-    Dim sTemp As String
-    
-    mErH.BoP ErrSrc(PROC)
-    sTemp = mFile.Temp(tmp_path:=ThisWorkbook.Path)
-    sTemp = mFile.Temp()
-    mErH.EoP ErrSrc(PROC)
-    
-End Sub
 Public Sub Test_52_File_Value()
 ' ------------------------------------------------
 ' This test relies on the Value (Let) service.
