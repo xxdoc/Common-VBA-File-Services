@@ -43,5 +43,5 @@ See table above
 ## Contribution
 Any kind of contribution is welcome. Respecting the (more or less obvious) coding principles are appreciated.
 
-[1]:https://gitcdn.link/repo/warbe-maker/Common-VBA-File-Services/master/mFile.bas
-[2]:https://gitcdn.link/repo/warbe-maker/Common-VBA-Directory-Services/master/mDct.bas
+[1]:https://gitcdn.link/repo/warbe-maker/Common-VBA-File-Services/master/source/mFile.bas
+[2]:https://gitcdn.link/repo/warbe-maker/Common-VBA-Directory-Services/master/source/mDct.bas
