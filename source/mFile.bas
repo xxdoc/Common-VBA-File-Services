@@ -7,38 +7,38 @@ Option Private Module
 '           Common methods and functions regarding file objects.
 '
 ' Public services:
-' - Exists          Returns TRUE when the file exists
-' - Compare         Displays differences of two files by means of WinMerge
-' - Differs         Returns a Dictionary with records which differ between two files
-'                   providing ignore case and ignore empty records options
+' - Exists          Returns TRUE when the provided file exists
+' - Compare         Displays the differences of two files by using WinMerge
+' - Differs         Returns a Dictionary with those records/lines which
+'                   differ between two provided files, with the options
+'                   'ignore case' and 'ignore empty records'
 ' - Delete          Deletes a file provided either as object or as full name
 ' - Extension       Returns the extension of a file's name
 ' - GetFile         Returns a file object for a given name
-' - SplitStr        Get the split string/character if a text stream
-' - Arry            From/to file. Get the content of a text file as
-'                   an arry of records(lines, Write an array of text
-'                   to a file.
+' - Arry            From/to file. Get the content of a text file as an arry
+'                   of records(lines, Write an array of text to a file.
 ' - SectionNames    Returns a Dictionary of all section names
 '                   [.....] in a file.
+' - Sections        Returns named - or if no names are provideds all - sections
+'                   as Dictionary. The Dictionary contains for each section a
+'                   Dictionary with the name as key and the value as item
+'                   (see ValueNames)
 ' - SectionsRemove  Removes the sections provided via their name. When no section
 '                   names are provided (pp_sections) none are removed.
 ' - Txt             Get th content of a text file as string or write
 '                   a string to a file - optionally appended
 ' - Value           Reads a named value from or writes a named value to a file
-' - ValueNames      Returns a Dictionary of all value names (with the value name as
-'                   key and the value as item) in file (pp_file) of the sections
-'                   (pp_sections) in asscending order. Sections names (pp_sections)
-'                   may be provided as a comma delimited string of names, or a
-'                   Dictionary or Collection of name items. When no section names
-'                   (pp_sections) are provided all unique! value names of all sections
-'                   in file (pp_file) are returned. Of duplicate names the value will
-'                   be of the first one found.
+' - ValueNames      Returns a Dictionary of all named sections in a file with the value
+'                   name as key and the value as item, in ascending order by the names.
+'                   Section names may be provided as a comma delimited string of names,
+'                   as a Dictionary or Collection of names. When no section names
+'                   are provided all unique! value names of all sections are returned.
+'                   Of duplicate names the value will be of the first one found.
 ' - Values          Returns a Dictionary with value as key and value name(s) in a
-'                   Collection as item. When (pp_sections) is ommited of all sections,
-'                   otherwise of the named sections which may be provided as a comma
-'                   delimited string of names, or a Collection or Dictionary of section
-'                   name items.
-'
+'                   Collection as item. When no section names are provided the values
+'                   of all sections are returned. Section names may be provided as a
+'                   comma delimited string of names, or a Collection or Dictionary of
+'                   section name (items).
 ' Uses:
 ' - mDct            Service DctAdd is used to provide Dictionaries in ascending
 '                   order by item or by key.
@@ -217,13 +217,8 @@ Public Function SectionExists( _
     SectionExists = mFile.SectionNames(pp_file).Exists(pp_section)
 End Function
 
-#If Test Then
 Public Function SectionNames( _
               Optional ByVal pp_file As String) As Dictionary
-#Else
-Private Function SectionNames( _
-              Optional ByVal pp_file As String) As Dictionary
-#End If
 ' -----------------------------------------------------------
 ' Returns a Dictionary of all section names [.....] in file
 ' (pp_file) in ascending sequence.
@@ -967,17 +962,10 @@ xt: Set vNames = Nothing
 eh: ErrMsg ErrSrc(PROC)
 End Sub
 
-#If Test Then
 Public Property Get Sections( _
                    Optional ByVal pp_file As String, _
                    Optional ByVal pp_sections As Variant = Nothing, _
                    Optional ByVal pp_replace As Boolean = False) As Dictionary
-#Else
-Private Property Get Sections( _
-                   Optional ByVal pp_file As String, _
-                   Optional ByVal pp_sections As Variant = Nothing, _
-                   Optional ByVal pp_replace As Boolean = False) As Dictionary
-#End If
 ' ----------------------------------------------------------------------------
 ' Returns the named sections (pp_section_names) - if not provided all sections - in
 ' file (pp_file) as Dictionary with the section name as the key - in ascending order! -
@@ -1261,15 +1249,9 @@ xt: Set Dict = dct
 eh: ErrMsg ErrSrc(PROC)
 End Property
 
-#If Test Then
-    Public Function ValueNames( _
-                          ByVal pp_file As String, _
-                 Optional ByVal pp_sections As Variant = Nothing) As Dictionary
-#Else
-    Private Function ValueNames( _
-                          ByVal pp_file As String, _
-                 Optional ByVal pp_sections As Variant = Nothing) As Dictionary
-#End If
+Public Function ValueNames( _
+                     ByVal pp_file As String, _
+            Optional ByVal pp_sections As Variant = Nothing) As Dictionary
 ' ------------------------------------------------------------------------
 ' Returns a Dictionary of all value names (with the value name as key and
 ' the value as item) in file (pp_file) of the sections (pp_sections) in
@@ -1335,15 +1317,10 @@ xt: Set dctNames = Nothing
     
 eh: ErrMsg ErrSrc(PROC)
 End Function
-#If Test Then
+
 Public Function Values( _
                  ByVal pp_file As String, _
         Optional ByVal pp_sections As Variant = Nothing) As Dictionary
-#Else
-Private Function Values( _
-                 ByVal pp_file As String, _
-        Optional ByVal pp_sections As Variant = Nothing) As Dictionary
-#End If
 ' --------------------------------------------------------------------
 ' Returns a Dictionary with the values in file (pp_file) as key.
 ' Attention! Because the same value may appear with several names when

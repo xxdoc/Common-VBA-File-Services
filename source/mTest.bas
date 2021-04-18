@@ -733,7 +733,6 @@ End Sub
 
 Public Sub Test_53_File_Values()
     Const PROC = "Test_53_File_Values"
-#If Test Then
     On Error GoTo eh
     Dim dct         As Dictionary
     Dim v           As Variant
@@ -779,12 +778,11 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOptResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
-#End If
 End Sub
 
 Public Sub Test_54_File_ValueNames()
     Const PROC = "Test_54_File_ValueNames"
-#If Test Then
+    
     On Error GoTo eh
     Dim v       As Variant
     Dim sFile   As String
@@ -810,12 +808,11 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOptResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
-#End If
 End Sub
 
 Public Sub Test_55_File_SectionNames()
     Const PROC = "Test_55_File_SectionNames"
-#If Test Then
+    
     On Error GoTo eh
     Dim v       As Variant
     Dim sFile   As String
@@ -845,7 +842,6 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOptResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
-#End If
 End Sub
 
 Public Sub Test_56_File_PrivateProperty_Exists()
@@ -916,7 +912,6 @@ Public Sub Test_60_File_SectionsCopy()
 ' - mFile.Sections Get and Let
 ' ------------------------------------------------
     Const PROC = "Test_60_File_SectionsCopy"
-#If Test Then
     On Error GoTo eh
     Dim fso             As New FileSystemObject
     Dim sFileGet        As String
@@ -981,7 +976,6 @@ eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
         Case mErH.DebugOptResumeNext: Resume Next
         Case mErH.ErrMsgDefaultButton: GoTo xt
     End Select
-#End If
 End Sub
 
 Public Sub Test_99_FileExists_NoFileObject_NoString()
