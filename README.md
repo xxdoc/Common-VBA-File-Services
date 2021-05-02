@@ -35,13 +35,14 @@ Simplify the handling of .ini, .cfg, or any other file organized by [section] va
 |                | Property Let: Write a value under a given name into a given section<br>Syntax:<br>`mFile.Value(file,section,valuename) = value` |
 
 ## Installation
-Download and import [mFile][1] to your VB project.
-Download and import [mDct][2] to your VB project.
+Download and import [mFile.bas][1] to your VB project.
+Download and import [mDct.bas][2] to your VB project.
+
 ## Usage
 See table above
 
 ## Contribution
-Any kind of contribution is welcome. Respecting the (more or less obvious) coding principles are appreciated.
+Any kind of contribution is welcome. Respecting the (more or less obvious) coding principles will be appreciated.
 
 [1]:https://gitcdn.link/repo/warbe-maker/Common-VBA-File-Services/master/source/mFile.bas
 [2]:https://gitcdn.link/repo/warbe-maker/Common-VBA-Directory-Services/master/source/mDct.bas
