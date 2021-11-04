@@ -132,25 +132,15 @@ Public Function Align( _
 
 End Function
 
-Public Function AppErr(ByVal lNo As Long) As Long
-' -------------------------------------------------------------------------------
-' Attention: This function is dedicated for being used with Err.Raise AppErr()
-'            in conjunction with the common error handling module mErrHndlr when
-'            the call stack is supported. The error number passed on to the entry
-'            procedure is interpreted when the error message is displayed.
-' The function ensures that a programmed (application) error numbers never
-' conflicts with VB error numbers by adding vbObjectError which turns it into a
-' negative value. In return, translates a negative error number back into an
-' Application error number. The latter is the reason why this function must never
-' be used with a true VB error number.
-' -------------------------------------------------------------------------------
-    
-    If lNo < 0 Then
-        AppErr = lNo - vbObjectError
-    Else
-        AppErr = vbObjectError + lNo
-    End If
-
+Private Function AppErr(ByVal app_err_no As Long) As Long
+' ------------------------------------------------------------------------------
+' Ensures that a programmed (i.e. an application) error numbers never conflicts
+' with the number of a VB runtime error. Thr function returns a given positive
+' number (app_err_no) with the vbObjectError added - which turns it into a
+' negative value. When the provided number is negative it returns the original
+' positive "application" error number e.g. for being used with an error message.
+' ------------------------------------------------------------------------------
+    AppErr = IIf(app_err_no < 0, app_err_no - vbObjectError, vbObjectError - app_err_no)
 End Function
 
 Public Function AppIsInstalled(ByVal sApp As String) As Boolean
@@ -521,22 +511,57 @@ Public Function ElementOfIndex(ByVal a As Variant, _
     
 End Function
 
-Private Sub ErrMsg( _
-             ByVal err_source As String, _
-    Optional ByVal err_no As Long = 0, _
-    Optional ByVal err_dscrptn As String = vbNullString)
-' ------------------------------------------------------
-' This Common Component does not have its own error
-' handling. Instead it passes on any error to the
-' caller's error handling.
-' ------------------------------------------------------
+Public Function ErrMsg(ByVal err_source As String, _
+          Optional ByVal err_no As Long = 0, _
+          Optional ByVal err_dscrptn As String = vbNullString, _
+         Optional ByVal err_line As Long = 0) As Variant
+' ------------------------------------------------------------------------------
+' Common, minimum VBA error handling providing the means to resume the error
+' line when the Conditional Compile Argument Debugging=1.
+' Usage: When this procedure is copied into any desired module the statement
+'        If ErrMsg(ErrSrc(PROC) = vbYes Then: Stop: Resume
+'        is appropriate
+'        The caller provides the source of the error through ErrSrc(PROC) where
+'        ErrSrc is a procedure available in the module using this ErrMsg and
+'        PROC is the constant identifying the procedure
+' Uses: AppErr to translate a negative programmed application error into its
+'              original positive number
+' ------------------------------------------------------------------------------
+    Dim ErrNo   As Long
+    Dim ErrDesc As String
+    Dim ErrType As String
+    Dim errline As Long
+    Dim AtLine  As String
+    Dim Buttons As Long
     
     If err_no = 0 Then err_no = Err.Number
+    If err_no < 0 Then
+        ErrNo = AppErr(err_no)
+        ErrType = "Applicatin error "
+    Else
+        ErrNo = err_no
+        ErrType = "Runtime error "
+    End If
+    
+    If err_line = 0 Then errline = Erl
+    If err_line <> 0 Then AtLine = " at line " & err_line
+    
     If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
+    If err_dscrptn = vbNullString Then err_dscrptn = "--- No error message available ---"
+    ErrDesc = "Error: " & vbLf & err_dscrptn & vbLf & vbLf & "Source: " & vbLf & err_source & AtLine
 
-    Err.Raise Number:=err_no, Source:=err_source, Description:=err_dscrptn
-
-End Sub
+    
+#If Debugging Then
+    Buttons = vbYesNo
+    ErrDesc = ErrDesc & vbLf & vbLf & "Debugging: Yes=Resume error line, No=Continue"
+#Else
+    Buttons = vbCritical
+#End If
+    
+    ErrMsg = MsgBox(Title:=ErrType & ErrNo & " in " & err_source _
+                  , Prompt:=ErrDesc _
+                  , Buttons:=Buttons)
+End Function
 
 Private Function ErrSrc(ByVal sProc As String) As String
     ErrSrc = ThisWorkbook.name & " mBasic." & sProc
