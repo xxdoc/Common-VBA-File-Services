@@ -179,7 +179,11 @@ xt: arry = a1
     Set fso = Nothing
     Exit Property
     
-eh: ErrMsg ErrSrc(PROC)
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
+    End Select
 End Property
 
 Public Function ValueExists( _
@@ -263,7 +267,11 @@ xt: Set SectionNames = dct
     Set dct = Nothing
     Exit Function
     
-eh: ErrMsg ErrSrc(PROC)
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
+    End Select
 End Function
 
 Public Property Get Txt( _
@@ -312,7 +320,11 @@ Public Property Get Txt( _
 
 xt: Exit Property
 
-eh: ErrMsg ErrSrc(PROC)
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
+    End Select
 End Property
 
 Public Property Let Txt( _
@@ -355,7 +367,11 @@ xt: ts.Close
     Set ts = Nothing
     Exit Property
     
-eh: ErrMsg ErrSrc(PROC)
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
+    End Select
 End Property
 
 Public Property Get Value( _
@@ -388,7 +404,11 @@ Public Property Get Value( _
     
 xt: Exit Property
 
-eh: ErrMsg ErrSrc(PROC)
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
+    End Select
 End Property
 
 Public Property Let Value( _
@@ -426,7 +446,11 @@ Public Property Let Value( _
 
 xt: Exit Property
 
-eh: ErrMsg ErrSrc(PROC)
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
+    End Select
 End Property
 
 Private Function AppErr(ByVal app_err_no As Long) As Long
@@ -497,7 +521,11 @@ Public Function Compare(ByVal fc_file_left As String, _
         
 xt: Exit Function
 
-eh: ErrMsg ErrSrc(PROC)
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
+    End Select
 End Function
 
 Public Sub Delete(ByVal v As Variant)
@@ -1285,7 +1313,7 @@ Public Function SelectFile( _
             .Filters.Add sel_filter_name, v
          Next v
          
-        If .show = -1 Then
+        If .Show = -1 Then
             '~~ A fie had been selected
            With New FileSystemObject
             Set sel_result = .GetFile(fDialog.SelectedItems(1))
