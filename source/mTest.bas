@@ -29,6 +29,17 @@ Private Property Get ValueName(Optional ByVal lS As Long, Optional ByVal lV As L
     ValueName = SECTION_NAME & Format(lS, "00") & VALUE_NAME & Format(lV, "00")
 End Property
 
+Private Function AppErr(ByVal app_err_no As Long) As Long
+' ------------------------------------------------------------------------------
+' Ensures that a programmed (i.e. an application) error numbers never conflicts
+' with the number of a VB runtime error. Thr function returns a given positive
+' number (app_err_no) with the vbObjectError added - which turns it into a
+' negative value. When the provided number is negative it returns the original
+' positive "application" error number e.g. for being used with an error message.
+' ------------------------------------------------------------------------------
+    If app_err_no >= 0 Then AppErr = app_err_no + vbObjectError Else AppErr = Abs(app_err_no - vbObjectError)
+End Function
+
 Private Property Get ValueString(Optional ByVal lS As Long, Optional ByVal lV As Long)
     ValueString = SECTION_NAME & Format(lS, "00") & VALUE_STRING & Format(lV, "00")
 End Property
@@ -52,7 +63,7 @@ Public Sub Regression()
     
     sTestStatus = "mFile Regression Test: "
 
-    mErH.BoTP ErrSrc(PROC), mErH.AppErr(1) ' For the very last test on an error condition
+    mErH.BoTP ErrSrc(PROC), AppErr(1) ' For the very last test on an error condition
     mTest.Regression_Other
     mTest.Regression_PrivateProfile
     
@@ -60,9 +71,10 @@ xt: TestFilesRemove
     mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -81,7 +93,7 @@ Public Sub Regression_Other()
     
     sTestStatus = "mFile Regression-Other: "
 
-    mErH.BoTP ErrSrc(PROC), mErH.AppErr(1) ' For the very last test on an error condition
+    mErH.BoTP ErrSrc(PROC), AppErr(1) ' For the very last test on an error condition
     mTest.Test_00_Temp
     mTest.Test_01_FileExists_Not
     mTest.Test_02_FileExists_ByObject
@@ -99,9 +111,10 @@ Public Sub Regression_Other()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -120,7 +133,7 @@ Public Sub Regression_PrivateProfile()
     
     sTestStatus = "mFile Regression_PrivateProfile: "
 
-    mErH.BoTP ErrSrc(PROC), mErH.AppErr(1) ' For the very last test on an error condition
+    mErH.BoTP ErrSrc(PROC), AppErr(1) ' For the very last test on an error condition
     mTest.Test_52_File_Value
     mTest.Test_53_File_Values
     mTest.Test_54_File_ValueNames
@@ -132,9 +145,10 @@ xt: TestFilesRemove
     mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -220,9 +234,10 @@ Public Sub Test_01_FileExists_Not()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -245,13 +260,13 @@ Public Sub Test_02_FileExists_ByObject()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
-  
 
 Public Sub Test_03_FileExists_ByFullName()
     Const PROC      As String = "Test_03_FileExists_ByFullName"
@@ -275,9 +290,10 @@ Public Sub Test_03_FileExists_ByFullName()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -306,9 +322,10 @@ Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -335,9 +352,10 @@ Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -367,9 +385,10 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -396,9 +415,10 @@ Public Sub Test_07_SelectFile()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -460,9 +480,10 @@ Public Sub Test_08_Txt_Let_Get()
 xt: Set fso = Nothing
     Exit Sub
 
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -543,13 +564,13 @@ xt: mErH.EoP ErrSrc(PROC)
     If fso.FileExists(sF2) Then fso.DeleteFile (sF2)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
-  
 Public Sub Test_09_File_Differs_False()
     Const PROC = "Test_09_File_Differs"
     
@@ -575,13 +596,13 @@ Public Sub Test_09_File_Differs_False()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
-  
 Public Sub Test_10_Arry_Get_Let()
     Const PROC = "Test_10_Arry_Get_Let"
     
@@ -608,20 +629,20 @@ Public Sub Test_10_Arry_Get_Let()
     mFile.Txt(sFile1) = "xxx" & vbCrLf & "" & "yyy"
     
     '~~ Get the two lines as Array
-    a = mFile.Arry(fa_file:=sFile1 _
+    a = mFile.arry(fa_file:=sFile1 _
                  , fa_split:=vbCrLf _
                   )
     Debug.Assert a(LBound(a)) = "xxx"
     Debug.Assert a(UBound(a)) = "yyy"
 
     '~~ Write array to file-2
-    mFile.Arry(fa_file:=sFile2 _
+    mFile.arry(fa_file:=sFile2 _
              , fa_split:=vbCrLf _
               ) = a
     Debug.Assert mFile.Differs(fso.GetFile(sFile1), fso.GetFile(sFile2)).Count = 0
 
     '~~ Count empty records when array contains all text lines
-    a = mFile.Arry(fa_file:=sFile1, fa_excl_empty_lines:=False)
+    a = mFile.arry(fa_file:=sFile1, fa_excl_empty_lines:=False)
     lInclEmpty = UBound(a) + 1
     lEmpty1 = 0
     For Each v In a
@@ -630,7 +651,7 @@ Public Sub Test_10_Arry_Get_Let()
     Next v
     
     '~~ Count empty records
-    a = mFile.Arry(fa_file:=sFile1, fa_excl_empty_lines:=True)
+    a = mFile.arry(fa_file:=sFile1, fa_excl_empty_lines:=True)
     lExclEmpty = UBound(a) + 1
     Debug.Assert lExclEmpty = lInclEmpty - lEmpty1
     
@@ -642,9 +663,10 @@ xt: With fso
     mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -676,9 +698,10 @@ Public Sub Test_11_Search()
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
 
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -724,10 +747,10 @@ xt: mErH.EoP ErrSrc(PROC)
     Set fso = Nothing
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: GoTo xt
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -773,10 +796,10 @@ xt: mErH.EoP ErrSrc(PROC)
     Set fso = Nothing
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: GoTo xt
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -803,10 +826,10 @@ xt: mErH.EoP ErrSrc(PROC)
     Set fso = Nothing
     Exit Sub
 
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: GoTo xt
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -837,10 +860,10 @@ xt: mErH.EoP ErrSrc(PROC)
     Set dct = Nothing
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: GoTo xt
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -897,10 +920,10 @@ xt: mErH.EoP ErrSrc(PROC)
     TestFilesRemove
     Exit Sub
 
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: GoTo xt
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -957,24 +980,24 @@ Public Sub Test_60_File_SectionsCopy()
     fso.DeleteFile sFileLet
        
     '~~ Test 3: Order sections in ascending sequence
-    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & SectionName(20) & "]"
+    Debug.Assert mFile.arry(sFileGet)(0) = "[" & SectionName(20) & "]"
     
     mFile.SectionsCopy pp_source:=sFileGet _
                      , pp_target:=sFileGet _
                      , pp_replace:=True ' essential to get them re-ordered in ascending sequence
     
     '~~ Test 3: Assert result
-    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & SectionName(1) & "]"
+    Debug.Assert mFile.arry(sFileGet)(0) = "[" & SectionName(1) & "]"
             
 xt: mErH.EoP ErrSrc(PROC)
     TestFilesRemove
     Set fso = Nothing
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
-        Case mErH.ErrMsgDefaultButton: GoTo xt
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
 
@@ -986,14 +1009,134 @@ Public Sub Test_99_FileExists_NoFileObject_NoString()
     Status = ErrSrc(PROC)
     mErH.BoP ErrSrc(PROC)
     mFile.Exists ThisWorkbook
-    Debug.Assert mErH.AppErr(1)
+    Debug.Assert AppErr(1)
         
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
     
-eh: Select Case mErH.ErrMsg(ErrSrc(PROC))
-        Case mErH.DebugOptResumeErrorLine: Stop: Resume
-        Case mErH.DebugOptResumeNext: Resume Next
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbYes: Stop: Resume
+        Case vbNo:  Stop: Resume Next
+        Case Else:  GoTo xt
     End Select
 End Sub
+
+Private Function ErrMsg(ByVal err_source As String, _
+               Optional ByVal err_no As Long = 0, _
+               Optional ByVal err_dscrptn As String = vbNullString, _
+               Optional ByVal err_line As Long = 0) As Variant
+' ------------------------------------------------------------------------------
+' This is a kind of universal error message which includes a debugging option.
+' It may be copied into any module as a Private Function. The function works
+' "standalone" as well with (i.e. uses) the Common VBA Message Component
+' (fMsg,mMsg) and with the Common Error Handling Component (ErH) installed.
+' Either will be used with the Conditional Compile Argument 'CommMsgComp = 1'
+' and/or 'CommErHComp = 1' which provides a better designed error message.
+'
+' Usage: When this procedure is copied as a Private Function into any desired
+'        module an error handling which consideres the possible Conditional
+'        Compile Argument 'Debugging = 1' will look as follows
+'
+'            Const PROC = "procedure-name"
+'            On Error Goto eh
+'        ....
+'        xt: Exit Sub/Function/Property
+'
+'        eh: Select Case ErrMsg(ErrSrc(PROC)
+'               Case vbYes: Stop: Resume
+'               Case vbNo:  Resume Next
+'               Case Else:  Goto xt
+'            End Select
+'        End Sub/Function/Property
+'
+'        The above may appear a lot of code lines but will be a godsend in case
+'        of an error!
+'
+' Used:  - For programmed application errors (Err.Raise AppErr(n), ....) the
+'          function AppErr will be used which turns the positive number into a
+'          negative one. The error message will regard a negative error number
+'          as an 'Application Error' and will use AppErr to turn it back for
+'          the message into its original positive number. Together with the
+'          ErrSrc there will be no need to maintain numerous different error
+'          numbers for a VB-Project.
+'        - The caller provides the source of the error through the module
+'          specific function ErrSrc(PROC) which adds the module name to the
+'          procedure name.
+' ------------------------------------------------------------------------------
+    Dim ErrBttns    As Variant
+    Dim ErrAtLine   As String
+    Dim ErrDesc     As String
+    Dim ErrLine     As Long
+    Dim ErrNo       As Long
+    Dim ErrSrc      As String
+    Dim ErrText     As String
+    Dim ErrTitle    As String
+    Dim ErrType     As String
+    
+    '~~ Obtain error information from the Err object for any argument not provided
+    If err_no = 0 Then err_no = Err.Number
+    If err_line = 0 Then ErrLine = Erl
+    If err_source = vbNullString Then err_source = Err.Source
+    If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
+    If err_dscrptn = vbNullString Then err_dscrptn = "--- No error description available ---"
+    
+    '~~ Determine the type of error
+    Select Case err_no
+        Case Is < 0
+            ErrNo = AppErr(err_no)
+            ErrType = "Application Error "
+        Case Else
+            ErrNo = err_no
+            If (InStr(1, err_dscrptn, "DAO") <> 0 _
+            Or InStr(1, err_dscrptn, "ODBC Teradata Driver") <> 0 _
+            Or InStr(1, err_dscrptn, "ODBC") <> 0 _
+            Or InStr(1, err_dscrptn, "Oracle") <> 0) _
+            Then ErrType = "Database Error " _
+            Else ErrType = "VB Runtime Error "
+    End Select
+    
+    If err_source <> vbNullString Then ErrSrc = " in: """ & err_source & """"   ' assemble ErrSrc from available information"
+    If err_line <> 0 Then ErrAtLine = " at line " & err_line                    ' assemble ErrAtLine from available information
+    ErrTitle = Replace(ErrType & ErrNo & ErrSrc & ErrAtLine, "  ", " ")         ' assemble ErrTitle from available information
+       
+    ErrText = "Error: " & vbLf & _
+              err_dscrptn & vbLf & vbLf & _
+              "Source: " & vbLf & _
+              err_source & ErrAtLine
+    
+#If Debugging Then
+    ErrBttns = vbYesNoCancel
+    ErrText = ErrText & vbLf & vbLf & _
+              "Debugging:" & vbLf & _
+              "Yes    = Resume error line" & vbLf & _
+              "No     = Resume Next (skip error line)" & vbLf & _
+              "Cancel = Terminate"
+#Else
+    ErrBttns = vbCritical
+#End If
+    
+#If CommErHComp Then
+    '~~ When the Common VBA Error Handling Component (ErH) is installed/used by in the VB-Project
+    ErrMsg = mErH.ErrMsg(err_source:=err_source, err_number:=err_no, err_dscrptn:=err_dscrptn, err_line:=err_line)
+    '~~ Translate back the elaborated reply buttons mErrH.ErrMsg displays and returns to the simple yes/No/Cancel
+    '~~ replies with the VBA MsgBox.
+    Select Case ErrMsg
+        Case mErH.DebugOptResumeErrorLine:  ErrMsg = vbYes
+        Case mErH.DebugOptResumeNext:       ErrMsg = vbNo
+        Case Else:                          ErrMsg = vbCancel
+    End Select
+#Else
+    '~~ When the Common VBA Error Handling Component (ErH) is not used/installed there might still be the
+    '~~ Common VBA Message Component (Msg) be installed/used
+#If CommMsgComp Then
+    ErrMsg = mMsg.ErrMsg(err_source:=err_source)
+#Else
+    '~~ None of the Common Components is installed/used
+    ErrMsg = MsgBox(Title:=ErrTitle _
+                  , Prompt:=ErrText _
+                  , Buttons:=ErrBttns)
+#End If
+#End If
+End Function
+
 
