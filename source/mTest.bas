@@ -19,7 +19,7 @@ End Property
 
 Private Property Let Status(ByVal s As String)
     If s <> vbNullString Then
-        Application.StatusBar = "Regression test " & ThisWorkbook.name & " module 'mFile': " & s
+        Application.StatusBar = "Regression test " & ThisWorkbook.Name & " module 'mFile': " & s
     Else
         Application.StatusBar = vbNullString
     End If
@@ -45,7 +45,7 @@ Private Property Get ValueString(Optional ByVal lS As Long, Optional ByVal lV As
 End Property
 
 Private Function ErrSrc(ByVal sProc As String) As String
-    ErrSrc = ThisWorkbook.name & ": mTest." & sProc
+    ErrSrc = ThisWorkbook.Name & ": mTest." & sProc
 End Function
 
 Public Sub Regression()
@@ -346,8 +346,8 @@ Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
     mErH.BoP ErrSrc(PROC), "fe_file:=", sWldCrd
     Debug.Assert mFile.Exists(fe_file:=sWldCrd, fe_cll:=cllFiles) = True
     Debug.Assert cllFiles.Count = 2
-    Debug.Assert cllFiles.Item(1).name = "fMsg.frm"
-    Debug.Assert cllFiles.Item(2).name = "fMsg.frx"
+    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
+    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
             
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
@@ -370,7 +370,7 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
     Status = ErrSrc(PROC)
     ' Prepare
     Set wb = ThisWorkbook
-    sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.name, ".")(0), vbNullString)
+    sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.Name, ".")(0), vbNullString)
     
     ' Test
     mErH.BoP ErrSrc(PROC), "fe_file:=", sWldCrd
@@ -379,8 +379,8 @@ Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
                               fe_cll:=cllFiles _
                              ) = True
     Debug.Assert cllFiles.Count >= 2
-    Debug.Assert cllFiles.Item(1).name = "fMsg.frm"
-    Debug.Assert cllFiles.Item(2).name = "fMsg.frx"
+    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
+    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
             
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
@@ -589,7 +589,7 @@ Public Sub Test_09_File_Differs_False()
     Set f2 = fso.GetFile("E:\Ablage\Excel VBA\DevAndTest\Common\File\mFile.bas")
     
     ' Test
-    mErH.BoP ErrSrc(PROC), "fd_file1 = ", f1.name, "fd_file2 = ", f2.name
+    mErH.BoP ErrSrc(PROC), "fd_file1 = ", f1.Name, "fd_file2 = ", f2.Name
     Set dctDiff = mFile.Differs(fd_file1:=f1, fd_file2:=f2, fd_ignore_empty_records:=True)
     Debug.Assert dctDiff.Count = 0
 
