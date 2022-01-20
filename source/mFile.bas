@@ -2,7 +2,7 @@ Attribute VB_Name = "mFile"
 Option Explicit
 Option Compare Text
 Option Private Module
-' ------------------------------------------------------------------------
+' ----------------------------------------------------------------------------
 ' Standard  Module mFile
 '           Common methods and functions regarding file objects.
 '
@@ -15,46 +15,45 @@ Option Private Module
 ' - Delete          Deletes a file provided either as object or as full name
 ' - Extension       Returns the extension of a file's name
 ' - GetFile         Returns a file object for a given name
-' - Arry            From/to file. Get the content of a text file as an arry
+' - Arry        Get Returns the content of a text file as an array
+'               Let Writes a text file from the content of an array
 '                   of records(lines, Write an array of text to a file.
 ' - SectionNames    Returns a Dictionary of all section names
 '                   [.....] in a file.
-' - Sections        Returns named - or if no names are provideds all - sections
-'                   as Dictionary. The Dictionary contains for each section a
-'                   Dictionary with the name as key and the value as item
-'                   (see ValueNames)
-' - SectionsRemove  Removes the sections provided via their name. When no section
-'                   names are provided (pp_sections) none are removed.
-' - Txt             Get th content of a text file as string or write
-'                   a string to a file - optionally appended
-' - Value           Reads a named value from or writes a named value to a file
-' - ValueNames      Returns a Dictionary of all named sections in a file with the value
-'                   name as key and the value as item, in ascending order by the names.
-'                   Section names may be provided as a comma delimited string of names,
-'                   as a Dictionary or Collection of names. When no section names
-'                   are provided all unique! value names of all sections are returned.
-'                   Of duplicate names the value will be of the first one found.
-' - Values          Returns a Dictionary with value as key and value name(s) in a
-'                   Collection as item. When no section names are provided the values
-'                   of all sections are returned. Section names may be provided as a
-'                   comma delimited string of names, or a Collection or Dictionary of
-'                   section name (items).
-' Uses:
-' - mDct            Service DctAdd is used to provide Dictionaries in ascending
-'                   order by item or by key.
-'                   Note! The components mTrc, fMsg, mMsg, and mErH are only used for testing
-'                   by the module mTest. They are not part of the to-be-installed
-'                   components of mFile.
+' - Sections    Get Returns named - or if no names are provideds all -
+'                   sections as Dictionary with the section name as the key
+'                   and the Values Dictionary as item
+'               Let Writes all sections provided as a Dictionary (as above)
+' - SectionsRemove  Removes the sections provided via their name. When no
+'                   section names are provided (pp_sections) none are
+'                   removed.
+' - Txt         Get Returns the content of a text file as text string
+'               Let Writes a string to a file - optionally appended
+' - Value       Get Reads a named value from a file
+'               Let Writes a named value to a file
+' - ValueNames      Returns a Dictionary of all named sections in a file with
+'                   the value name as key and the value as item, in ascending
+'                   order by the names. Section names may be provided as a
+'                   comma delimited string of names, as a Dictionary or
+'                   Collection of names. When no section names are provided
+'                   all unique! value names of all sections are returned. For
+'                   duplicate names the value of the first one is returned.
+' - Values          Returns a Dictionary with Value-Name as the key and the
+'                   Value as the item When no section name(s) are provided
+'                   the values of all sections are returned. Section names
+'                   may be provided as a comma delimited string of names, or
+'                   a Collection or Dictionary of section names (items).
+'
+' Uses:             No other components (mErH and mMsg/fMsg are optional)
 '
 ' Requires: Reference to "Microsoft Scripting Runtine"
 '
-' This 'Common VBA Component is developed, maintained and tested (regression test
-' available in mTest module and obligatory with each code modification) in the
-' public Github repo: https://github.com/warbe-maker/Common-VBA-File-Services.
+' This 'Common Component' is developed, maintained in the public Github repo:
+' https://github.com/warbe-maker/Common-VBA-File-Services.
 ' Contribution in whichever form is welcome.
 '
-' W. Rauschenberger, Berlin Nov 2020
-' ------------------------------------------------------------------------
+' W. Rauschenberger, Berlin Jan 2022
+' ----------------------------------------------------------------------------
 Private Declare PtrSafe Function WritePrivateProfileString _
                 Lib "kernel32" Alias "WritePrivateProfileStringA" _
                (ByVal lpw_ApplicationName As String, _
@@ -108,17 +107,17 @@ Private Property Get SplitStr(ByRef s As String)
     Else If InStr(s, vbCr) <> 0 Then SplitStr = vbCr
 End Property
 
-Public Property Let arry( _
+Public Property Let Arry( _
            Optional ByVal fa_file As String, _
            Optional ByVal fa_excl_empty_lines As Boolean = False, _
            Optional ByRef fa_split As String = vbCrLf, _
            Optional ByVal fa_append As Boolean = False, _
                     ByVal fa_ar As Variant)
-' -----------------------------------------------------------------
-' Writes array (fa_ar) to file (fa_file) whereby the array is
-' joined to a text string using the line break string (fa_split)
-' which defaults to vbCrLf and is optionally returned by Arry-Get.
-' -----------------------------------------------------------------
+' ----------------------------------------------------------------------------
+' Writes array (fa_ar) to file (fa_file) whereby the array is joined to a text
+' string using the line break string (fa_split) which defaults to vbCrLf and
+' is optionally returned by Arry-Get.
+' ----------------------------------------------------------------------------
                     
     mFile.Txt(ft_file:=fa_file _
             , ft_append:=fa_append _
@@ -127,15 +126,164 @@ Public Property Let arry( _
              
 End Property
 
-Public Property Get arry( _
+Private Sub DctAddAscByKey(ByRef add_dct As Dictionary, _
+                           ByVal add_key As Variant, _
+                           ByVal add_item As Variant)
+' ----------------------------------------------------------------------------
+' Adds to the Dictionary (add_dct) an item (add_item) in ascending order by
+' the key (add_key). When the key is an object with no Name property an error
+' is raised.
+'
+' Note: This is a copy of the DctAdd procedure with fixed options which may be
+'       copied into any VBProject's module in order to have it independant
+'       from this Common Component.
+'
+' W. Rauschenberger, Berlin Jan 2022
+' ----------------------------------------------------------------------------
+    Const PROC = "DctAdd"
+    Dim bDone           As Boolean
+    Dim dctTemp         As Dictionary
+    Dim vItem           As Variant
+    Dim vItemExisting   As Variant
+    Dim vKeyExisting    As Variant
+    Dim vValueExisting  As Variant ' the entry's add_key/add_item value for the comparison with the vValueNew
+    Dim vValueNew       As Variant ' the argument add_key's/add_item's value
+    Dim vValueTarget    As Variant ' the add before/after add_key/add_item's value
+    Dim bStayWithFirst  As Boolean
+    Dim bOrderByItem    As Boolean
+    Dim bOrderByKey     As Boolean
+    Dim bSeqAscending   As Boolean
+    Dim bCaseIgnored    As Boolean
+    Dim bCaseSensitive  As Boolean
+    Dim bEntrySequence  As Boolean
+    
+    On Error GoTo eh
+    
+    If add_dct Is Nothing Then Set add_dct = New Dictionary
+    
+    '~~ Plausibility checks
+    bOrderByItem = False
+    bOrderByKey = True
+    bSeqAscending = True
+    bCaseIgnored = False
+    bCaseSensitive = True
+    bStayWithFirst = True
+    bEntrySequence = False
+    
+    With add_dct
+        '~~ When it is the very first add_item or the add_order option
+        '~~ is entry sequence the add_item will just be added
+        If .Count = 0 Or bEntrySequence Then
+            .Add add_key, add_item
+            GoTo xt
+        End If
+        
+        '~~ When the add_order is by add_key and not stay with first entry added
+        '~~ and the add_key already exists the add_item is updated
+        If bOrderByKey And Not bStayWithFirst Then
+            If .Exists(add_key) Then
+                If VarType(add_item) = vbObject Then Set .Item(add_key) = add_item Else .Item(add_key) = add_item
+                GoTo xt
+            End If
+        End If
+    End With
+        
+    '~~ When the add_order argument is an object but does not have a name property raise an error
+    If bOrderByKey Then
+        If VarType(add_key) = vbObject Then
+            On Error Resume Next
+            add_key.Name = add_key.Name
+            If Err.Number <> 0 _
+            Then Err.Raise AppErr(7), ErrSrc(PROC), "The add_order option is by add_key, the add_key is an object but does not have a name property!"
+        End If
+    ElseIf bOrderByItem Then
+        If VarType(add_item) = vbObject Then
+            On Error Resume Next
+            add_item.Name = add_item.Name
+            If Err.Number <> 0 _
+            Then Err.Raise AppErr(8), ErrSrc(PROC), "The add_order option is by add_item, the add_item is an object but does not have a name property!"
+        End If
+    End If
+    
+    vValueNew = DctAddOrderValue(add_key)
+    
+    With add_dct
+        '~~ Get the last entry's add_order value
+        vValueExisting = DctAddOrderValue(.Keys()(.Count - 1))
+        
+        '~~ When the add_order mode is ascending and the last entry's add_key or add_item
+        '~~ is less than the add_order argument just add it and exit
+        If bSeqAscending And vValueNew > vValueExisting Then
+            .Add add_key, add_item
+            GoTo xt
+        End If
+    End With
+        
+    '~~ Since the new add_key/add_item couldn't simply be added to the Dictionary it will
+    '~~ be inserted before or after the add_key/add_item as specified.
+    Set dctTemp = New Dictionary
+    bDone = False
+    
+    For Each vKeyExisting In add_dct
+        
+        If VarType(add_dct.Item(vKeyExisting)) = vbObject _
+        Then Set vItemExisting = add_dct.Item(vKeyExisting) _
+        Else vItemExisting = add_dct.Item(vKeyExisting)
+        
+        With dctTemp
+            If bDone Then
+                '~~ All remaining items just transfer
+                .Add vKeyExisting, vItemExisting
+            Else
+                vValueExisting = DctAddOrderValue(vKeyExisting)
+            
+                If vValueExisting = vValueNew And bOrderByItem And bSeqAscending And Not .Exists(add_key) Then
+                    If bStayWithFirst Then
+                        .Add vKeyExisting, vItemExisting:   bDone = True ' not added
+                    Else
+                        '~~ The add_item already exists. When the add_key doesn't exist and bStayWithFirst is False the add_item is added
+                        .Add vKeyExisting, vItemExisting:   .Add add_key, add_item:                     bDone = True
+                    End If
+                ElseIf bSeqAscending And vValueExisting > vValueNew Then
+                    .Add add_key, add_item:                     .Add vKeyExisting, vItemExisting:   bDone = True
+                Else
+                    .Add vKeyExisting, vItemExisting ' transfer existing add_item, wait for the one which fits within sequence
+                End If
+            End If
+        End With ' dctTemp
+    Next vKeyExisting
+    
+    '~~ Return the temporary dictionary with the new add_item added and all exiting items in add_dct transfered to it
+    Set add_dct = dctTemp
+    Set dctTemp = Nothing
+
+xt: Exit Sub
+
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
+    End Select
+End Sub
+
+Private Function DctAddOrderValue(ByVal dctkey As Variant) As Variant
+' ----------------------------------------------------------------------------
+' When key is an object its name becomes the order value else the key as is.
+' ----------------------------------------------------------------------------
+    If VarType(dctkey) = vbObject _
+    Then DctAddOrderValue = dctkey.Name _
+    Else DctAddOrderValue = dctkey
+End Function
+
+
+Public Property Get Arry( _
            Optional ByVal fa_file As String, _
            Optional ByVal fa_excl_empty_lines As Boolean = False, _
            Optional ByRef fa_split As String, _
            Optional ByVal fa_append As Boolean = False) As Variant
-' -----------------------------------------------------------------------
-' Returns the content of the file (fa_file) - a files full name - as
-' array, with the used line break string returned in (fa_split).
-' -----------------------------------------------------------------------
+' ----------------------------------------------------------------------------
+' Returns the content of the file (fa_file) - a files full name - as array,
+' with the used line break string returned in (fa_split).
+' ----------------------------------------------------------------------------
     Const PROC  As String = "Arry"
     
     On Error GoTo eh
@@ -173,16 +321,15 @@ Public Property Get arry( _
         Next v
     End If
     
-xt: arry = a1
+xt: Arry = a1
     fa_split = sSplit
     Set cll = Nothing
     Set fso = Nothing
     Exit Property
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
@@ -190,12 +337,12 @@ Public Function ValueExists( _
                           ByVal pp_file As String, _
                           ByVal pp_value As Variant, _
                  Optional ByVal pp_sections As Variant = Nothing) As Boolean
-' --------------------------------------------------------------------------
+' ----------------------------------------------------------------------------
 ' Returns True when the value (pp_value) exists in file (pp_file) - when no
 ' section name is provided in any section, else in the given sections.
-' Section names (pp_sections) may be provided as comma delimited string or
-' as Dictionary or Collection with name items.
-' --------------------------------------------------------------------------
+' Section names (pp_sections) may be provided as comma delimited string or as
+' Dictionary or Collection with name items.
+' ----------------------------------------------------------------------------
     ValueExists = mFile.Values(pp_file, pp_sections).Exists(pp_value)
 End Function
 
@@ -203,33 +350,30 @@ Public Function ValueNameExists( _
                           ByVal pp_file As String, _
                           ByVal pp_valuename As String, _
                  Optional ByVal pp_sections As Variant = Nothing) As Boolean
-' --------------------------------------------------------------------------
+' ----------------------------------------------------------------------------
 ' Returns True when the value name (pp_valuename) exists in file (pp_file)
 ' - when no section name is provided in any section, else in the given
 ' sections. Section names (pp_sections) may be provided as comma delimited
 ' string or as Dictionary or Collection with name items.
-' -------------------------------------------------------------------------
+' ----------------------------------------------------------------------------
     ValueNameExists = mFile.ValueNames(pp_file, pp_sections).Exists(pp_valuename)
 End Function
                  
 Public Function SectionExists( _
                         ByVal pp_file As String, _
                         ByVal pp_section As String) As Boolean
-' --------------------------------------------------------------------
+' ----------------------------------------------------------------------------
 ' Returns True when the section (pp_section) exists in file (pp_file).
-' --------------------------------------------------------------------
+' ----------------------------------------------------------------------------
     SectionExists = mFile.SectionNames(pp_file).Exists(pp_section)
 End Function
 
 Public Function SectionNames( _
               Optional ByVal pp_file As String) As Dictionary
-' -----------------------------------------------------------
-' Returns a Dictionary of all section names [.....] in file
-' (pp_file) in ascending sequence.
-'
-' Uses: mDct.DctAdd to order the sections in ascending
-' sequence.
-' -----------------------------------------------------------
+' ----------------------------------------------------------------------------
+' Returns a Dictionary of all section names [.....] in file (pp_file) in
+' ascending sequence.
+' ----------------------------------------------------------------------------
     Const PROC = "SectionNames"
     
     On Error GoTo eh
@@ -256,10 +400,9 @@ Public Function SectionNames( _
         asSections = Split(strBuffer, vbNullChar)
         For i = LBound(asSections) To UBound(asSections)
             If Len(asSections(i)) <> 0 _
-            Then mDct.DctAdd add_dct:=dct _
-                           , add_key:=asSections(i) _
-                           , add_item:=asSections(i) _
-                           , add_seq:=seq_ascending
+            Then DctAddAscByKey add_dct:=dct _
+                              , add_key:=asSections(i) _
+                              , add_item:=asSections(i)
         Next i
     End If
     
@@ -268,9 +411,8 @@ xt: Set SectionNames = dct
     Exit Function
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -278,13 +420,11 @@ Public Property Get Txt( _
          Optional ByVal ft_file As Variant, _
          Optional ByVal ft_append As Boolean = True, _
          Optional ByRef ft_split As String) As String
-' ----------------------------------------------------
-' Returns the text file's (ft_file) content as string
-' with VBA.Split() string in (ft_split). When the file
-' doesn't exist a vbNullString is returned.
-' Note: ft_append is not used but specified to comply
-'       with the Get Property declaration.
-' ----------------------------------------------------
+' ----------------------------------------------------------------------------
+' Returns the text file's (ft_file) content as string with VBA.Split() string
+' in (ft_split). When the file doesn't exist a vbNullString is returned.
+' Note: ft_append is not used but specified to comply with Property Let.
+' ----------------------------------------------------------------------------
     Const PROC = "Txt-Get"
     
     On Error GoTo eh
@@ -321,9 +461,8 @@ Public Property Get Txt( _
 xt: Exit Property
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
@@ -332,12 +471,11 @@ Public Property Let Txt( _
          Optional ByVal ft_append As Boolean = True, _
          Optional ByRef ft_split As String, _
                   ByVal ft_string As String)
-' -----------------------------------------------------
-' Writes the string (ft_string) into the file (ft_file)
-' which might be a file object of a file's full name.
-' Note: ft_split is not used but specified to comply
-'       with the Get Property declaration.
-' -----------------------------------------------------
+' ----------------------------------------------------------------------------
+' Writes the string (ft_string) into the file (ft_file) which might be a file
+' object or a file's full name.
+' Note: ft_split is not used but specified to comply with Property Get.
+' ----------------------------------------------------------------------------
     Const PROC = "Txt-Let"
     
     On Error GoTo eh
@@ -368,9 +506,8 @@ xt: ts.Close
     Exit Property
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
@@ -378,11 +515,11 @@ Public Property Get Value( _
            Optional ByVal pp_file As String, _
            Optional ByVal pp_section As String, _
            Optional ByVal pp_value_name As String) As Variant
-' -----------------------------------------------------------
+' ----------------------------------------------------------------------------
 ' Read a value with a specific name from a section
 ' [section]
 ' <value-name>=<value>
-' -----------------------------------------------------------
+' ----------------------------------------------------------------------------
     Const PROC  As String = "ValueGet"
     
     On Error GoTo eh
@@ -405,9 +542,8 @@ Public Property Get Value( _
 xt: Exit Property
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
@@ -416,11 +552,11 @@ Public Property Let Value( _
            Optional ByVal pp_section As String, _
            Optional ByVal pp_value_name As String, _
                     ByVal pp_value As Variant)
-' --------------------------------------------------
-' Write a value under a name into a section in a
-' file in the form: [section]
-'                   <value-name>=<value>
-' --------------------------------------------------
+' ----------------------------------------------------------------------------
+' Write a value under a name into a section in a file in the form:
+' [section]
+' <value-name>=<value>
+' ----------------------------------------------------------------------------
     Const PROC = "ValueLet"
         
     On Error GoTo eh
@@ -443,25 +579,31 @@ Public Property Let Value( _
                "Value      = '" & CStr(pp_value) & "'" & vbLf & _
                "Value file = '" & pp_file & "'"
     End If
+    
+'    If bNewSection Or bNewName Then mFile.SectionsReorg sr_file:=pp_file
 
 xt: Exit Property
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
-Private Function AppErr(ByVal app_err_no As Long) As Long
-' ------------------------------------------------------------------------------
-' Ensures that a programmed (i.e. an application) error numbers never conflicts
-' with the number of a VB runtime error. Thr function returns a given positive
-' number (app_err_no) with the vbObjectError added - which turns it into a
-' negative value. When the provided number is negative it returns the original
-' positive "application" error number e.g. for being used with an error message.
-' ------------------------------------------------------------------------------
-    If app_err_no >= 0 Then AppErr = app_err_no + vbObjectError Else AppErr = Abs(app_err_no - vbObjectError)
+Private Function AppErr(ByVal err_no As Long) As Long
+' ----------------------------------------------------------------------------
+' Used with Err.Raise AppErr(<l>).
+' When the error number <l> is > 0 it is considered an "Application Error
+' Number and vbObjectErrror is added to it into a negative number in order not
+' to confuse with a VB runtime error. When the error number <l> is negative it
+' is considered an Application Error and vbObjectError is added to convert it
+' back into its origin positive number.
+' ----------------------------------------------------------------------------
+    If err_no < 0 Then
+        AppErr = err_no - vbObjectError
+    Else
+        AppErr = vbObjectError + err_no
+    End If
 End Function
 
 Private Function AppIsInstalled(ByVal sApp As String) As Boolean
@@ -479,10 +621,10 @@ Public Function Compare(ByVal fc_file_left As String, _
                         ByVal fc_left_title As String, _
                         ByVal fc_file_right As String, _
                         ByVal fc_right_title As String) As Long
-' ---------------------------------------------------------------------
+' ----------------------------------------------------------------------------
 ' Compares two text files by means of WinMerge. An error is raised when
 ' WinMerge is not installed of one of the two files doesn't exist.
-' ----------------------------------------------------------------------
+' ----------------------------------------------------------------------------
     Const PROC = "Compare"
     
     On Error GoTo eh
@@ -494,18 +636,18 @@ Public Function Compare(ByVal fc_file_left As String, _
     
     If Not AppIsInstalled("WinMerge") _
     Then Err.Raise Number:=AppErr(1) _
-                 , Source:=ErrSrc(PROC) _
+                 , source:=ErrSrc(PROC) _
                  , Description:="WinMerge is obligatory for the Compare service of this module but not installed!" & vbLf & vbLf & _
                                 "(See ""https://winmerge.org/downloads/?lang=en"" for download)"
         
     If Not fso.FileExists(fc_file_left) _
     Then Err.Raise Number:=AppErr(2) _
-                 , Source:=ErrSrc(PROC) _
+                 , source:=ErrSrc(PROC) _
                  , Description:="The file """ & fc_file_left & """ does not exist!"
     
     If Not fso.FileExists(fc_file_right) _
     Then Err.Raise Number:=AppErr(3) _
-                 , Source:=ErrSrc(PROC) _
+                 , source:=ErrSrc(PROC) _
                  , Description:="The file """ & fc_file_right & """ does not exist!"
     
     sCommand = "WinMergeU /e" & _
@@ -522,9 +664,8 @@ Public Function Compare(ByVal fc_file_left As String, _
 xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -545,32 +686,39 @@ Private Function ErrMsg(ByVal err_source As String, _
                Optional ByVal err_dscrptn As String = vbNullString, _
                Optional ByVal err_line As Long = 0) As Variant
 ' ------------------------------------------------------------------------------
-' This is a kind of universal error message which includes a debugging option.
-' It may be copied into any module - turned into a Private function. When the/my
-' Common VBA Error Handling Component (ErH) is installed and the Conditional
-' Compile Argument 'CommErHComp = 1' the error message will be displayed by
-' means of the Common VBA Message Component (fMsg, mMsg).
+' Universal error message display service including a debugging option active
+' when the Conditional Compile Argument 'Debugging = 1' and an optional
+' additional "About the error:" section displaying text connected to an error
+' message by two vertical bars (||).
 '
-' Usage: When this procedure is copied as a Private Function into any desired
-'        module an error handling which consideres the possible Conditional
-'        Compile Argument 'Debugging = 1' will look as follows
+' A copy of this function is used in each procedure with an error handling
+' (On error Goto eh).
 '
-'            Const PROC = "procedure-name"
+' The function considers the Common VBA Error Handling Component (ErH) which
+' may be installed (Conditional Compile Argument 'ErHComp = 1') and/or the
+' Common VBA Message Display Component (mMsg) installed (Conditional Compile
+' Argument 'MsgComp = 1'). Only when none of the two is installed the error
+' message is displayed by means of the VBA.MsgBox.
+'
+' Usage: Example with the Conditional Compile Argument 'Debugging = 1'
+'
+'        Private/Public <procedure-name>
+'            Const PROC = "<procedure-name>"
+'
 '            On Error Goto eh
-'        ....
+'            ....
 '        xt: Exit Sub/Function/Property
 '
-'        eh: Select Case ErrMsg(ErrSrc(PROC)
-'               Case vbYes: Stop: Resume
-'               Case vbNo:  Resume Next
-'               Case Else:  Goto xt
+'        eh: Select Case ErrMsg(ErrSrc(PROC))
+'               Case vbResume:  Stop: Resume
+'               Case Else:      GoTo xt
 '            End Select
 '        End Sub/Function/Property
 '
 '        The above may appear a lot of code lines but will be a godsend in case
 '        of an error!
 '
-' Used:  - For programmed application errors (Err.Raise AppErr(n), ....) the
+' Uses:  - For programmed application errors (Err.Raise AppErr(n), ....) the
 '          function AppErr will be used which turns the positive number into a
 '          negative one. The error message will regard a negative error number
 '          as an 'Application Error' and will use AppErr to turn it back for
@@ -580,7 +728,31 @@ Private Function ErrMsg(ByVal err_source As String, _
 '        - The caller provides the source of the error through the module
 '          specific function ErrSrc(PROC) which adds the module name to the
 '          procedure name.
+'
+' W. Rauschenberger Berlin, Nov 2021
 ' ------------------------------------------------------------------------------
+#If ErHComp = 1 Then
+    '~~ ------------------------------------------------------------------------
+    '~~ When the Common VBA Error Handling Component (mErH) is installed in the
+    '~~ VB-Project (which includes the mMsg component) the mErh.ErrMsg service
+    '~~ is preferred since it provides some enhanced features like a path to the
+    '~~ error.
+    '~~ ------------------------------------------------------------------------
+    ErrMsg = mErH.ErrMsg(err_source, err_no, err_dscrptn, err_line)
+    GoTo xt
+#ElseIf MsgComp = 1 Then
+    '~~ ------------------------------------------------------------------------
+    '~~ When only the Common Message Services Component (mMsg) is installed but
+    '~~ not the mErH component the mMsg.ErrMsg service is preferred since it
+    '~~ provides an enhanced layout and other features.
+    '~~ ------------------------------------------------------------------------
+    ErrMsg = mMsg.ErrMsg(err_source, err_no, err_dscrptn, err_line)
+    GoTo xt
+#End If
+    '~~ -------------------------------------------------------------------
+    '~~ When neither the mMsg nor the mErH component is installed the error
+    '~~ message is displayed by means of the VBA.MsgBox
+    '~~ -------------------------------------------------------------------
     Dim ErrBttns    As Variant
     Dim ErrAtLine   As String
     Dim ErrDesc     As String
@@ -590,13 +762,21 @@ Private Function ErrMsg(ByVal err_source As String, _
     Dim ErrText     As String
     Dim ErrTitle    As String
     Dim ErrType     As String
-    
+    Dim ErrAbout    As String
+        
     '~~ Obtain error information from the Err object for any argument not provided
     If err_no = 0 Then err_no = Err.Number
     If err_line = 0 Then ErrLine = Erl
-    If err_source = vbNullString Then err_source = Err.Source
+    If err_source = vbNullString Then err_source = Err.source
     If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
     If err_dscrptn = vbNullString Then err_dscrptn = "--- No error description available ---"
+    
+    If InStr(err_dscrptn, "||") <> 0 Then
+        ErrDesc = Split(err_dscrptn, "||")(0)
+        ErrAbout = Split(err_dscrptn, "||")(1)
+    Else
+        ErrDesc = err_dscrptn
+    End If
     
     '~~ Determine the type of error
     Select Case err_no
@@ -610,7 +790,7 @@ Private Function ErrMsg(ByVal err_source As String, _
             Or InStr(1, err_dscrptn, "ODBC") <> 0 _
             Or InStr(1, err_dscrptn, "Oracle") <> 0) _
             Then ErrType = "Database Error " _
-            Else ErrType = "VB Runtime Error "
+            Else: ErrType = "VB Runtime Error "
     End Select
     
     If err_source <> vbNullString Then ErrSrc = " in: """ & err_source & """"   ' assemble ErrSrc from available information"
@@ -618,48 +798,95 @@ Private Function ErrMsg(ByVal err_source As String, _
     ErrTitle = Replace(ErrType & ErrNo & ErrSrc & ErrAtLine, "  ", " ")         ' assemble ErrTitle from available information
        
     ErrText = "Error: " & vbLf & _
-              err_dscrptn & vbLf & vbLf & _
+              ErrDesc & vbLf & vbLf & _
               "Source: " & vbLf & _
               err_source & ErrAtLine
+    If ErrAbout <> vbNullString _
+    Then ErrText = ErrText & vbLf & vbLf & _
+                  "About: " & vbLf & _
+                  ErrAbout
     
 #If Debugging Then
-    ErrBttns = vbYesNoCancel
+    ErrBttns = vbYesNo
     ErrText = ErrText & vbLf & vbLf & _
               "Debugging:" & vbLf & _
-              "Yes    = Resume error line" & vbLf & _
-              "No     = Resume Next (skip error line)" & vbLf & _
-              "Cancel = Terminate"
+              "Yes    = Resume Error Line" & vbLf & _
+              "No     = Terminate"
 #Else
     ErrBttns = vbCritical
 #End If
     
-#If CommErHComp Then
-    '~~ When the Common VBA Error Handling Component (ErH) is installed/used by in the VB-Project
-    ErrMsg = ErrMsg(err_source:=err_source, err_number:=err_no, err_dscrptn:=err_dscrptn, err_line:=err_line)
-    '~~ Translate back the elaborated reply buttons mErrH.ErrMsg displays and returns to the simple yes/No/Cancel
-    '~~ replies with the VBA MsgBox.
-    Select Case ErrMsg
-        Case mErH.DebugOptResumeErrorLine:  ErrMsg = vbYes
-        Case mErH.DebugOptResumeNext:       ErrMsg = vbNo
-        Case Else:                          ErrMsg = vbCancel
-    End Select
-#Else
-    '~~ When the Common VBA Error Handling Component (ErH) is not used/installed there might still be the
-    '~~ Common VBA Message Component (Msg) be installed/used
-#If CommMsgComp Then
-    ErrMsg = mMsg.ErrMsg(err_source:=err_source)
-#Else
-    '~~ None of the Common Components is installed/used
     ErrMsg = MsgBox(Title:=ErrTitle _
                   , Prompt:=ErrText _
                   , Buttons:=ErrBttns)
-#End If
-#End If
+xt: Exit Function
+
 End Function
 
 Private Function ErrSrc(ByVal sProc As String) As String
     ErrSrc = "mFile." & sProc
 End Function
+
+Public Sub SectionsReorg(Optional ByVal sr_file As Variant = Nothing, _
+                         Optional ByVal sr_section As String = vbNullString)
+' ----------------------------------------------------------------------------
+' Reorganizes all sections in file (sr_file) - when not provided selectied)
+' by rewriting them all including the value names in ascending order.
+' Constraint: The file must not contain any comment lines othe than at the top
+'             of all sections.
+' ----------------------------------------------------------------------------
+    Const PROC = "SectionsReorg"
+    
+    On Error GoTo eh
+    Dim vSection    As Variant
+    Dim Section     As String
+    Dim dctSections As Dictionary
+    Dim fl          As File
+    Dim dctValues   As Dictionary
+    Dim vValue      As Variant
+    Dim fso         As New FileSystemObject
+    
+    If sr_file Is Nothing Then
+        mFile.SelectFile sel_result:=fl
+        If fl Is Nothing Then GoTo xt
+    ElseIf TypeName(sr_file) = "File" Then
+        If sr_file Is Nothing Then
+            mFile.SelectFile sel_result:=fl
+            If fl Is Nothing Then GoTo xt
+        Else
+            Set fl = sr_file
+        End If
+    ElseIf TypeName(sr_file) = "String" Then
+        If sr_file = vbNullString Then
+            mFile.SelectFile sel_result:=fl
+        Else
+            If fso.FileExists(sr_file) Then
+                Set fl = fso.GetFile(sr_file)
+            Else
+                mFile.SelectFile sel_result:=fl
+                If fl Is Nothing Then GoTo xt
+            End If
+        End If
+    End If
+        
+    Set dctSections = Sections(pp_file:=fl.Path)
+    For Each vSection In dctSections
+        Section = vSection
+        Set dctValues = dctSections(vSection)
+        
+        mFile.SectionsRemove fl.Path, Section
+        For Each vValue In dctValues
+            mFile.Value(pp_file:=fl.Path, pp_section:=Section, pp_value_name:=vValue) = dctValues(vValue)
+        Next vValue
+    Next vSection
+
+xt: Exit Sub
+
+eh: Select Case ErrMsg(ErrSrc(PROC))
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
+    End Select
+End Sub
 
 Public Function Search(ByVal fs_root As String, _
               Optional ByVal fs_mask As String = "*", _
@@ -703,11 +930,11 @@ xt: Set Search = cllRet
     Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
+
 
 Public Function Exists(ByVal fe_file As Variant, _
               Optional ByRef fe_fso As File = Nothing, _
@@ -793,9 +1020,8 @@ Public Function Exists(ByVal fe_file As Variant, _
 xt: Exit Function
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -823,12 +1049,12 @@ Private Function Fc(ByVal fc_file1 As String, fc_file2 As String)
     
     If Not fso.FileExists(fc_file1) _
     Then Err.Raise Number:=AppErr(2) _
-                 , Source:=ErrSrc(PROC) _
+                 , source:=ErrSrc(PROC) _
                  , Description:="The file """ & fc_file1 & """ does not exist!"
     
     If Not fso.FileExists(fc_file2) _
     Then Err.Raise Number:=AppErr(3) _
-                 , Source:=ErrSrc(PROC) _
+                 , source:=ErrSrc(PROC) _
                  , Description:="The file """ & fc_file2 & """ does not exist!"
     
     sCommand = "Fc /C /W " & _
@@ -843,9 +1069,8 @@ Private Function Fc(ByVal fc_file1 As String, fc_file2 As String)
 xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -1020,9 +1245,8 @@ xt: Set Differs = dctDif
     Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -1096,9 +1320,8 @@ xt: Set vNames = Nothing
     Exit Sub
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Sub
 
@@ -1113,8 +1336,6 @@ Public Property Get Sections( _
 ' value as item.
 ' The section names (pp_section_names) may be a comma delimmited string of names a
 ' Dictionary or a Collection, both with the item as name.
-'
-' Requires: Service mDct.DctAdd to order the sections in ascending sequence.
 ' -------------------------------------------------------------------------------------
     Const PROC = "Sections-Get"
     
@@ -1135,22 +1356,17 @@ Public Property Get Sections( _
         Set dctV = mFile.ValueNames(pp_file:=pp_file _
                                   , pp_sections:=sName _
                                    )
-        mDct.DctAdd add_dct:=dctS _
-                  , add_key:=sName _
-                  , add_item:=dctV _
-                  , add_seq:=seq_ascending _
-                  , add_order:=order_bykey
+        DctAddAscByKey add_dct:=dctS _
+                     , add_key:=sName _
+                     , add_item:=dctV
     Next v
 
 xt: Set Sections = dctS
-    Set dctS = Nothing
-    Set dctV = Nothing
     Exit Property
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
@@ -1198,9 +1414,8 @@ Private Property Let Sections( _
 xt: Exit Property
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
@@ -1245,9 +1460,8 @@ xt: Set NamesInArg = cll
     Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -1279,9 +1493,8 @@ xt: Set vNames = Nothing
     Exit Sub
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Sub
 
@@ -1326,9 +1539,8 @@ Public Function SelectFile( _
 xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -1407,9 +1619,8 @@ xt: Set Dict = dct
     Exit Property
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Property
 
@@ -1424,8 +1635,6 @@ Public Function ValueNames( _
 ' items. When no section names (pp_sections) are provided all unique!
 ' value names of all sections in file (pp_file) are returned. Of duplicate
 ' names the value will be of the first one found.
-'
-' Uses: mDct.DctAdd to order the sections in ascending sequence.
 ' ------------------------------------------------------------------------
     Const PROC = "ValueNames"
     
@@ -1465,10 +1674,9 @@ Public Function ValueNames( _
                 sName = asNames(i)
                 If Len(sName) <> 0 Then
                     If Not dctNames.Exists(sName) _
-                    Then mDct.DctAdd add_dct:=dctNames _
-                                   , add_key:=sName _
-                                   , add_item:=mFile.Value(pp_file:=pp_file, pp_section:=sSection, pp_value_name:=sName) _
-                                   , add_seq:=seq_ascending
+                    Then DctAddAscByKey add_dct:=dctNames _
+                                      , add_key:=sName _
+                                      , add_item:=mFile.Value(pp_file:=pp_file, pp_section:=sSection, pp_value_name:=sName)
                 End If
             Next i
         End If
@@ -1480,9 +1688,8 @@ xt: Set dctNames = Nothing
     Exit Function
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
@@ -1497,8 +1704,6 @@ Public Function Values( _
 ' otherwise of the named sections which may be provided as a comma
 ' delimited string of names, or a Collection or Dictionary of section
 ' name items.
-'
-' Uses: mDct.DctAdd to order the sections in ascending sequence.
 ' --------------------------------------------------------------------
     Const PROC = "Values"
     
@@ -1525,18 +1730,16 @@ Public Function Values( _
             If Not dct.Exists(sValue) Then
                 Set cllNames = New Collection
                 cllNames.Add sValName
-                mDct.DctAdd add_dct:=dct _
-                          , add_key:=sValue _
-                          , add_item:=cllNames _
-                          , add_seq:=seq_ascending
+                DctAddAscByKey add_dct:=dct _
+                             , add_key:=sValue _
+                             , add_item:=cllNames
             Else
                 Set cllNames = dct.Item(sValue)
                 cllNames.Add sValName
                 dct.Remove sValue
-                mDct.DctAdd add_dct:=dct _
-                          , add_key:=sValue _
-                          , add_item:=cllNames _
-                          , add_seq:=seq_ascending
+                DctAddAscByKey add_dct:=dct _
+                             , add_key:=sValue _
+                             , add_item:=cllNames
             End If
         Next vName
     Next vSection
@@ -1545,9 +1748,8 @@ xt: Set Values = dct
     Exit Function
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
-        Case Else:  GoTo xt
+        Case vbResume:  Stop: Resume
+        Case Else:      GoTo xt
     End Select
 End Function
 
