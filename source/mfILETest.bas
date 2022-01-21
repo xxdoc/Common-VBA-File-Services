@@ -119,7 +119,7 @@ Private Function ErrMsg(ByVal err_source As String, _
     '~~ Obtain error information from the Err object for any argument not provided
     If err_no = 0 Then err_no = Err.Number
     If err_line = 0 Then ErrLine = Erl
-    If err_source = vbNullString Then err_source = Err.Source
+    If err_source = vbNullString Then err_source = Err.source
     If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
     If err_dscrptn = vbNullString Then err_dscrptn = "--- No error description available ---"
     
@@ -176,7 +176,7 @@ xt: Exit Function
 End Function
 
 Private Function ErrSrc(ByVal sProc As String) As String
-    ErrSrc = ThisWorkbook.Name & ": mFileTest." & sProc
+    ErrSrc = "mFileTest." & sProc
 End Function
 
 Public Sub Regression()
@@ -248,21 +248,20 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
 End Sub
 
 Public Sub Regression_PrivateProfile()
-' ---------------------------------------------------------
-' All results are asserted and there is no intervention
-' required for the whole test. When an assertion fails the
-' test procedure will stop and indicates the problem with
-' the called procedure.
-' An execution trace is displayed for each test procedure.
-' ---------------------------------------------------------
+' ----------------------------------------------------------------------------
+' All results are asserted and there is no intervention required for the whole
+' test. When an assertion fails the test procedure will stop and indicate the
+' problem with the called procedure. An execution trace is displayed for each
+' test procedure.
+' ----------------------------------------------------------------------------
     Const PROC = "Regression_PrivateProfile"
 
     On Error GoTo eh
     Dim sTestStatus As String
     
     sTestStatus = "mFile Regression_PrivateProfile: "
-
     mErH.BoTP ErrSrc(PROC), AppErr(1) ' For the very last test on an error condition
+    
     mfILETest.Test_52_File_Value
     mfILETest.Test_53_File_Values
     mfILETest.Test_54_File_ValueNames

@@ -46,7 +46,6 @@ Simplifies the handling of .ini, .cfg, or any other file organized by [section] 
 
 ## Installation
 Download and import [mFile.bas][1] to your VB project.
-Download and import [mDct.bas][2] to your VB project.
 
 ## Usage
 See table above
