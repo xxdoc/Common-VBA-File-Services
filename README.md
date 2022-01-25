@@ -9,7 +9,7 @@
 | Delete         | Deletes a file provided either as object or as full name when it exists  |
 | Dict           | Returns the content of a test file as Dictionary |
 | Differs        | Returns a Dictionary of those records which differ between two files providing an _ignore case_ and _ignore empty records_ option |
-| Exists         | Returns True when a given file exists, returns a collection of all files found when specified with wildcards |
+| Exists         | Returns True when a given folder, file, section, or value-name exists, returns a collection of all files found. Syntax:<br>`mFile.Exists(folder[, file[, section[, value-name]]]` |
 | Extension      | Returns a the extension of file's name. The file may be provided either as file object or as full name|
 | GetFile        | Returns a file object for given file's full name |
 | Search         | Returns a collection of all files found supporting wildcards and sub-folders | 
