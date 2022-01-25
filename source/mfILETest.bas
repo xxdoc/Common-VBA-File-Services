@@ -10,8 +10,8 @@ Private Const VALUE_STRING = "-Value-"  ' for PrivateProfile services test
     
 Private cllTestFiles    As Collection
 
-Private Property Get SectionName(Optional ByVal l As Long)
-    SectionName = SECTION_NAME & Format(l, "00")
+Private Property Get TestProc_SectionName(Optional ByVal l As Long)
+    TestProc_SectionName = SECTION_NAME & Format(l, "00")
 End Property
 
 Private Property Let Status(ByVal s As String)
@@ -22,12 +22,12 @@ Private Property Let Status(ByVal s As String)
     End If
 End Property
 
-Private Property Get ValueName(Optional ByVal lS As Long, Optional ByVal lV As Long)
-    ValueName = SECTION_NAME & Format(lS, "00") & VALUE_NAME & Format(lV, "00")
+Private Property Get TestProc_ValueName(Optional ByVal lS As Long, Optional ByVal lV As Long)
+    TestProc_ValueName = SECTION_NAME & Format(lS, "00") & VALUE_NAME & Format(lV, "00")
 End Property
 
-Private Property Get ValueString(Optional ByVal lS As Long, Optional ByVal lV As Long)
-    ValueString = SECTION_NAME & Format(lS, "00") & VALUE_STRING & Format(lV, "00")
+Private Property Get TestProc_ValueString(Optional ByVal lS As Long, Optional ByVal lV As Long)
+    TestProc_ValueString = SECTION_NAME & Format(lS, "00") & VALUE_STRING & Format(lV, "00")
 End Property
 
 Private Function ErrMsg(ByVal err_source As String, _
@@ -116,7 +116,7 @@ Private Function ErrMsg(ByVal err_source As String, _
     '~~ Obtain error information from the Err object for any argument not provided
     If err_no = 0 Then err_no = Err.Number
     If err_line = 0 Then ErrLine = Erl
-    If err_source = vbNullString Then err_source = Err.source
+    If err_source = vbNullString Then err_source = Err.Source
     If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
     If err_dscrptn = vbNullString Then err_dscrptn = "--- No error description available ---"
     
@@ -195,7 +195,7 @@ Public Sub Regression()
     mFileTest.Regression_Other
     mFileTest.Regression_PrivateProfile
     
-xt: TestFilesRemove
+xt: TestProc_RemoveTestFiles
     mErH.EoP ErrSrc(PROC)
     Exit Sub
     
@@ -221,19 +221,13 @@ Public Sub Regression_Other()
     sTestStatus = "mFile Regression-Other: "
 
     mErH.BoTP ErrSrc(PROC), AppErr(1) ' For the very last test on an error condition
-    mFileTest.Test_00_Temp
-    mFileTest.Test_01_FileExists_Not
-    mFileTest.Test_02_FileExists_ByObject
-    mFileTest.Test_03_FileExists_ByFullName
-    mFileTest.Test_04_FileExists_ByFullName_WildCard_ExactlyOne
-    mFileTest.Test_05_FileExists_ByFullName_WildCard_MoreThanOne
-    mFileTest.Test_06_FileExists_WildCard_MoreThanOne_InSubFolder
-    mFileTest.Test_07_SelectFile
-    mFileTest.Test_08_Txt_Let_Get
+    mFileTest.Test_01_File_Temp
+    mFileTest.Test_02_File_Exists
+    mFileTest.Test_07_File_Select
+    mFileTest.Test_08_File_Txt_Let_Get
     mFileTest.Test_09_File_Differs
-    mFileTest.Test_10_Arry_Get_Let
-    mFileTest.Test_11_Search
-    mFileTest.Test_99_FileExists_NoFileObject_NoString ' Error AppErr(1) !
+    mFileTest.Test_10_File_Arry_Get_Let
+    mFileTest.Test_11_File_Search
     
 xt: mErH.EoP ErrSrc(PROC)
     Exit Sub
@@ -259,14 +253,14 @@ Public Sub Regression_PrivateProfile()
     sTestStatus = "mFile Regression_PrivateProfile: "
     mErH.BoTP ErrSrc(PROC), AppErr(1) ' For the very last test on an error condition
     
-    mFileTest.Test_52_File_Value
-    mFileTest.Test_53_File_Values
-    mFileTest.Test_54_File_ValueNames
-    mFileTest.Test_55_File_SectionNames
-    mFileTest.Test_56_File_PrivateProperty_Exists
-    mFileTest.Test_60_File_SectionsCopy
+    mFileTest.Test_92_PrivateProfile_File_Value
+    mFileTest.Test_93_PrivateProfile_File_Values
+    mFileTest.Test_94_PrivateProfile_File_ValueNames
+    mFileTest.Test_95_PrivateProfile_File_SectionsNames
+    mFileTest.Test_96_PrivateProfile_File_Items_Exists
+    mFileTest.Test_97_PrivateProfile_File_SectionsCopy
     
-xt: TestFilesRemove
+xt: TestProc_RemoveTestFiles
     mErH.EoP ErrSrc(PROC)
     Exit Sub
     
@@ -276,7 +270,7 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Private Sub TestFilesRemove()
+Private Sub TestProc_RemoveTestFiles()
 
     Dim fso As New FileSystemObject
     Dim sFile   As String
@@ -293,19 +287,19 @@ Private Sub TestFilesRemove()
     
 End Sub
 
-Private Function TestFileTemp() As String
+Private Function TestProc_TempFile() As String
     Dim sFile   As String
     
     sFile = mFile.Temp(tmp_extension:=".dat")
-    TestFileTemp = sFile
+    TestProc_TempFile = sFile
     
     If cllTestFiles Is Nothing Then Set cllTestFiles = New Collection
     cllTestFiles.Add sFile
 
 End Function
 
-Private Function TestFileWithSections(ByVal ts_sections As Long, _
-                                      ByVal ts_values As Long) As String
+Private Function TestProc_PrivateProfile_File(ByVal ts_sections As Long, _
+                                              ByVal ts_values As Long) As String
 ' ---------------------------------------------------------------------
 ' Returns the name of a temporary test file with (ts_sections) sections
 ' with (ts_values) values each.
@@ -317,21 +311,21 @@ Private Function TestFileWithSections(ByVal ts_sections As Long, _
     sFile = mFile.Temp(tmp_extension:=".dat")
     For i = ts_sections To 1 Step -1
         For j = ts_values To 1 Step -1
-            Debug.Print "ValueString(i, j) = " & ValueString(i, j)
+            Debug.Print "TestProc_ValueString(i, j) = " & TestProc_ValueString(i, j)
             mFile.Value(pp_file:=sFile _
-                      , pp_section:=SectionName(i) _
-                      , pp_value_name:=ValueName(i, j) _
-                       ) = ValueString(i, j)
+                      , pp_section:=TestProc_SectionName(i) _
+                      , pp_value_name:=TestProc_ValueName(i, j) _
+                       ) = TestProc_ValueString(i, j)
         Next j
     Next i
-    TestFileWithSections = sFile
+    TestProc_PrivateProfile_File = sFile
     If cllTestFiles Is Nothing Then Set cllTestFiles = New Collection
     cllTestFiles.Add sFile
     
 End Function
 
-Public Sub Test_00_Temp()
-    Const PROC = "Test_00_Temp"
+Public Sub Test_01_File_Temp()
+    Const PROC = "Test_01_File_Temp"
 
     Dim sTemp As String
     
@@ -342,164 +336,53 @@ Public Sub Test_00_Temp()
     
 End Sub
 
-Public Sub Test_01_FileExists_Not()
-    Const PROC = "Test_01_FileExists_Not"
-    Const NOT_EXIST = "Test.txt"
+Public Sub Test_02_File_Exists()
+    Const PROC = "Test_02_File_Exists"
     
     On Error GoTo eh
-
-    mErH.BoP ErrSrc(PROC), "fe_file:=", NOT_EXIST
-    Status = ErrSrc(PROC)
-    Debug.Assert mFile.Exists(fe_file:="Test.txt") = False
-        
-xt: mErH.EoP ErrSrc(PROC)
-    Exit Sub
-    
-eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbResume:  Stop: Resume
-        Case Else:      GoTo xt
-    End Select
-End Sub
-
-Public Sub Test_02_FileExists_ByObject()
-    Const PROC      As String = "Test_02_FileExists_ByObject"
-    
-    On Error GoTo eh
-    Dim wb          As Workbook
-    Dim fso         As File
-
-    Status = ErrSrc(PROC)
-    Set wb = ThisWorkbook
-    With New FileSystemObject
-        Set fso = .GetFile(wb.FullName)
-    End With
-    
-    mErH.BoP ErrSrc(PROC), "fe_file:=", wb.FullName
-    Debug.Assert mFile.Exists(fe_file:=fso) = True
-        
-xt: mErH.EoP ErrSrc(PROC)
-    Exit Sub
-    
-eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbResume:  Stop: Resume
-        Case Else:      GoTo xt
-    End Select
-End Sub
-
-  
-
-Public Sub Test_03_FileExists_ByFullName()
-    Const PROC      As String = "Test_03_FileExists_ByFullName"
-    
-    On Error GoTo eh
-    Dim wb          As Workbook
-    Dim fso         As File
-    Dim fsoExists   As File
-
-    mErH.BoP ErrSrc(PROC)
-    Set wb = ThisWorkbook
-    Status = ErrSrc(PROC)
-    
-    With New FileSystemObject
-        Set fso = .GetFile(wb.FullName)
-    End With
-      
-    Debug.Assert mFile.Exists(fso.Path, fsoExists) = True
-    Debug.Assert fsoExists Is fso
-            
-xt: mErH.EoP ErrSrc(PROC)
-    Exit Sub
-    
-eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbResume:  Stop: Resume
-        Case Else:      GoTo xt
-    End Select
-End Sub
-
-Public Sub Test_04_FileExists_ByFullName_WildCard_ExactlyOne()
-    Const PROC = "Test_04_FileExists_ByFullName_WildCard_ExactlyOne"
-    
-    On Error GoTo eh
-    Dim wb      As Workbook
-    Dim fsoFile As File
-    Dim fso     As New FileSystemObject
     Dim cll     As Collection
-    Dim sWldCrd As String
+    Dim fso     As New FileSystemObject
+    Dim sFile   As String
     
-    Status = ErrSrc(PROC)
-    ' Prepare
-    Set wb = ThisWorkbook
-    Set fsoFile = fso.GetFile(wb.FullName)
-    sWldCrd = VBA.Left$(fsoFile.Path, Len(fsoFile.Path) - 3) & "*"
+    mErH.BoP ErrSrc(PROC)
     
-    ' Test
-    mErH.BoP ErrSrc(PROC), "fe_file:=", sWldCrd
-    Debug.Assert mFile.Exists(fe_file:=sWldCrd, fe_cll:=cll) = True
-    Debug.Assert cll.Count = 1
-    Debug.Assert cll.Item(1).Path = fsoFile.Path
-            
-xt: mErH.EoP ErrSrc(PROC)
-    Exit Sub
+    '~~ Folder exists
+    Debug.Assert mFile.Exists(ex_folder:=ThisWorkbook.Path & "x") = False
+    Debug.Assert mFile.Exists(ex_folder:=ThisWorkbook.Path) = True
     
-eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbResume:  Stop: Resume
-        Case Else:      GoTo xt
-    End Select
-End Sub
+    '~~ File exists
+    Debug.Assert mFile.Exists(ex_folder:=ThisWorkbook.Path, ex_file:=ThisWorkbook.Name & "x") = False
+    Debug.Assert mFile.Exists(ex_folder:=ThisWorkbook.Path, ex_file:=ThisWorkbook.Name) = True
 
-Public Sub Test_05_FileExists_ByFullName_WildCard_MoreThanOne()
-    Const PROC = "Test_05_FileExists_ByFullName_WildCard_MoreThanOne"
-    
-    On Error GoTo eh
-    Dim wb          As Workbook
-    Dim cllFiles    As Collection
-    Dim sWldCrd     As String
-
-    Status = ErrSrc(PROC)
-    ' Prepare
-    Set wb = ThisWorkbook
-    sWldCrd = wb.Path & "\fMsg*"
-    
-    ' Test
-    mErH.BoP ErrSrc(PROC), "fe_file:=", sWldCrd
-    Debug.Assert mFile.Exists(fe_file:=sWldCrd, fe_cll:=cllFiles) = True
-    Debug.Assert cllFiles.Count = 2
-    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
-    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
-            
-xt: mErH.EoP ErrSrc(PROC)
-    Exit Sub
-    
-eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbResume:  Stop: Resume
-        Case Else:      GoTo xt
-    End Select
-End Sub
-
-Public Sub Test_06_FileExists_WildCard_MoreThanOne_InSubFolder()
-    Const PROC      As String = "Test_06_FileExists_WildCard_MoreThanOne_InSubFolder"       ' This procedure's name for the error handling and execution tracking
-    
-    On Error GoTo eh
-    Dim wb          As Workbook
-    Dim cllFiles    As Collection
-    Dim sWldCrd     As String
-
-    Status = ErrSrc(PROC)
-    ' Prepare
-    Set wb = ThisWorkbook
-    sWldCrd = Replace(wb.Path & "\fMsg*", "\" & Split(wb.Name, ".")(0), vbNullString)
-    
-    ' Test
-    mErH.BoP ErrSrc(PROC), "fe_file:=", sWldCrd
-    Debug.Assert mFile.Exists( _
-                              fe_file:=sWldCrd, _
-                              fe_cll:=cllFiles _
+    '~~ Section exists
+    sFile = TestProc_PrivateProfile_File(ts_sections:=3, ts_values:=3)
+    Debug.Assert mFile.Exists(ex_folder:=fso.GetFile(sFile).ParentFolder _
+                            , ex_file:=fso.GetFile(sFile).Name _
+                            , ex_section:=TestProc_SectionName(2) _
                              ) = True
-    Debug.Assert cllFiles.Count >= 2
-    Debug.Assert cllFiles.Item(1).Name = "fMsg.frm"
-    Debug.Assert cllFiles.Item(2).Name = "fMsg.frx"
+    
+    '~~ Value-Name exists
+    Debug.Assert mFile.Exists(ex_folder:=fso.GetFile(sFile).ParentFolder _
+                            , ex_file:=fso.GetFile(sFile).Name _
+                            , ex_section:=TestProc_SectionName(2) _
+                            , ex_value_name:=TestProc_ValueName(2, 2) _
+                             ) = True
+
+    '~~ File by wildcard, in any sub-folder, exactly one
+    Debug.Assert mFile.Exists(ex_folder:=ThisWorkbook.Path _
+                            , ex_file:=Replace(ThisWorkbook.Name, "xlsb", "xl*") _
+                            , ex_result_files:=cll) = True
+    Debug.Assert cll.Count = 1
+    Debug.Assert cll(1).Path = ThisWorkbook.FullName
             
-xt: mErH.EoP ErrSrc(PROC)
+    '~~ File by wildcard, in any sub-folder, more than one
+    Debug.Assert mFile.Exists(ex_folder:=ThisWorkbook.Path, ex_file:="fMsg.fr*", ex_result_files:=cll) = True
+    Debug.Assert cll.Count = 2
+    Debug.Assert cll(1).Name = "fMsg.frm"
+    Debug.Assert cll(2).Name = "fMsg.frx"
+                        
+xt: TestProc_RemoveTestFiles
+    mErH.EoP ErrSrc(PROC)
     Exit Sub
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
@@ -508,8 +391,8 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_07_SelectFile()
-    Const PROC = "Test_07_SelectFile"
+Public Sub Test_07_File_Select()
+    Const PROC = "Test_07_File_Select"
     
     On Error GoTo eh
     Dim fso As File
@@ -537,8 +420,8 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_08_Txt_Let_Get()
-    Const PROC = "Test_08_Txt_Let_Get"
+Public Sub Test_08_File_Txt_Let_Get()
+    Const PROC = "Test_08_File_Txt_Let_Get"
     
     On Error GoTo eh
     Dim sFl     As String
@@ -713,8 +596,8 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
 End Sub
 
   
-Public Sub Test_10_Arry_Get_Let()
-    Const PROC = "Test_10_Arry_Get_Let"
+Public Sub Test_10_File_Arry_Get_Let()
+    Const PROC = "Test_10_File_Arry_Get_Let"
     
     On Error GoTo eh
     Dim sFile1      As String
@@ -779,8 +662,8 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_11_Search()
-    Const PROC = "Test_11_Search"
+Public Sub Test_11_File_Search()
+    Const PROC = "Test_11_File_Search"
     
     On Error GoTo eh
     Dim cll As Collection
@@ -812,11 +695,11 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_52_File_Value()
+Public Sub Test_92_PrivateProfile_File_Value()
 ' ------------------------------------------------
 ' This test relies on the Value (Let) service.
 ' ------------------------------------------------
-    Const PROC = "Test_52_File_Value"
+    Const PROC = "Test_92_PrivateProfile_File_Value"
     
     On Error GoTo eh
     Dim fso         As New FileSystemObject
@@ -825,7 +708,7 @@ Public Sub Test_52_File_Value()
     Dim cyResult    As Currency
     
     '~~ Test preparation
-    sFile = TestFileTemp
+    sFile = TestProc_TempFile
         
     mErH.BoP ErrSrc(PROC)
     
@@ -836,21 +719,21 @@ Public Sub Test_52_File_Value()
                             ) = vbNullString
     
     '~~ Test 2: Write values
-    mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 1)) = ValueString(1, 1)
-    mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 2)) = ValueString(1, 2)
-    mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 1)) = ValueString(2, 1)
-    mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 2)) = cyValue
+    mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(1), pp_value_name:=TestProc_ValueName(1, 1)) = TestProc_ValueString(1, 1)
+    mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(1), pp_value_name:=TestProc_ValueName(1, 2)) = TestProc_ValueString(1, 2)
+    mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(2), pp_value_name:=TestProc_ValueName(2, 1)) = TestProc_ValueString(2, 1)
+    mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(2), pp_value_name:=TestProc_ValueName(2, 2)) = cyValue
     
     '~~ Test 2: Assert written values
-    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 1)) = ValueString(1, 1)
-    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=SectionName(1), pp_value_name:=ValueName(1, 2)) = ValueString(1, 2)
-    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 1)) = ValueString(2, 1)
-    cyResult = mFile.Value(pp_file:=sFile, pp_section:=SectionName(2), pp_value_name:=ValueName(2, 2))
+    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(1), pp_value_name:=TestProc_ValueName(1, 1)) = TestProc_ValueString(1, 1)
+    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(1), pp_value_name:=TestProc_ValueName(1, 2)) = TestProc_ValueString(1, 2)
+    Debug.Assert mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(2), pp_value_name:=TestProc_ValueName(2, 1)) = TestProc_ValueString(2, 1)
+    cyResult = mFile.Value(pp_file:=sFile, pp_section:=TestProc_SectionName(2), pp_value_name:=TestProc_ValueName(2, 2))
     Debug.Assert cyResult = cyValue
     Debug.Assert VarType(cyResult) = vbCurrency
     
 xt: mErH.EoP ErrSrc(PROC)
-    TestFilesRemove
+    TestProc_RemoveTestFiles
     Set fso = Nothing
     Exit Sub
     
@@ -860,14 +743,14 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_53_File_Values()
-    Const PROC = "Test_53_File_Values"
+Public Sub Test_93_PrivateProfile_File_Values()
+    Const PROC = "Test_93_PrivateProfile_File_Values"
     On Error GoTo eh
     Dim dct         As Dictionary
     Dim sFile       As String
     Dim fso         As New FileSystemObject
     
-    sFile = TestFileWithSections(ts_sections:=3 _
+    sFile = TestProc_PrivateProfile_File(ts_sections:=3 _
                                , ts_values:=3 _
                                 )
     
@@ -875,22 +758,22 @@ Public Sub Test_53_File_Values()
 
     '~~ Test 1: All values of one section
     Set dct = mFile.Values(pp_file:=sFile _
-                         , pp_section:=SectionName(1) _
+                         , pp_section:=TestProc_SectionName(1) _
                           )
     '~~ Test 1: Assert the content of the result Dictionary
     Debug.Assert dct.Count = 3
     Debug.Print dct.Keys()(0)
     Debug.Print dct.Keys()(1)
     Debug.Print dct.Keys()(2)
-    Debug.Assert dct.Keys()(0) = ValueName(1, 1)
-    Debug.Assert dct.Keys()(1) = ValueName(1, 2)
-    Debug.Assert dct.Keys()(2) = ValueName(1, 3)
+    Debug.Assert dct.Keys()(0) = TestProc_ValueName(1, 1)
+    Debug.Assert dct.Keys()(1) = TestProc_ValueName(1, 2)
+    Debug.Assert dct.Keys()(2) = TestProc_ValueName(1, 3)
     '~~ Attention! There may be more value names for a value when the same value appears in several sections under a different value name!
     '~~            Thus, the names are returned as Collection. When the values are from one specific section there will be only one name
     '~~            in the item=collection
-    Debug.Assert dct.Items()(0)(1) = ValueString(1, 1)
-    Debug.Assert dct.Items()(1)(1) = ValueString(1, 2)
-    Debug.Assert dct.Items()(2)(1) = ValueString(1, 3)
+    Debug.Assert dct.Items()(0)(1) = TestProc_ValueString(1, 1)
+    Debug.Assert dct.Items()(1)(1) = TestProc_ValueString(1, 2)
+    Debug.Assert dct.Items()(2)(1) = TestProc_ValueString(1, 3)
     
     '~~ Test 2: No section provided
     Debug.Assert mFile.Values(sFile, vbNullString).Count = 0
@@ -899,7 +782,7 @@ Public Sub Test_53_File_Values()
     Debug.Assert mFile.Values(sFile, "xxxxxxx").Count = 0
 
 xt: mErH.EoP ErrSrc(PROC)
-    TestFilesRemove
+    TestProc_RemoveTestFiles
     Set dct = Nothing
     Set fso = Nothing
     Exit Sub
@@ -910,26 +793,26 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_54_File_ValueNames()
-    Const PROC = "Test_54_File_ValueNames"
+Public Sub Test_94_PrivateProfile_File_ValueNames()
+    Const PROC = "Test_94_PrivateProfile_File_ValueNames"
     
     On Error GoTo eh
     Dim sFile   As String
     Dim dct     As Dictionary
     Dim fso     As New FileSystemObject
     
-    sFile = TestFileWithSections(ts_sections:=5, ts_values:=3)
+    sFile = TestProc_PrivateProfile_File(ts_sections:=5, ts_values:=3)
     
     mErH.BoP ErrSrc(PROC)
     Set dct = mFile.ValueNames(sFile)
     Debug.Assert dct.Count = 9
-    Debug.Assert dct.Keys()(0) = ValueName(1, 1)
-    Debug.Assert dct.Keys()(1) = ValueName(1, 2)
-    Debug.Assert dct.Keys()(2) = ValueName(1, 3)
+    Debug.Assert dct.Keys()(0) = TestProc_ValueName(1, 1)
+    Debug.Assert dct.Keys()(1) = TestProc_ValueName(1, 2)
+    Debug.Assert dct.Keys()(2) = TestProc_ValueName(1, 3)
     
     
 xt: mErH.EoP ErrSrc(PROC)
-    TestFilesRemove
+    TestProc_RemoveTestFiles
     Set fso = Nothing
     Exit Sub
 
@@ -939,25 +822,25 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_55_File_SectionNames()
-    Const PROC = "Test_55_File_SectionNames"
+Public Sub Test_95_PrivateProfile_File_SectionsNames()
+    Const PROC = "Test_95_PrivateProfile_File_SectionsNames"
     
     On Error GoTo eh
     Dim sFile   As String
     Dim fso     As New FileSystemObject
     Dim dct     As Dictionary
     
-    sFile = TestFileWithSections(ts_sections:=3, ts_values:=3)
+    sFile = TestProc_PrivateProfile_File(ts_sections:=3, ts_values:=3)
     
     mErH.BoP ErrSrc(PROC)
     Set dct = mFile.SectionNames(sFile)
     Debug.Assert dct.Count = 3
-    Debug.Assert dct.Items()(0) = SectionName(1)
-    Debug.Assert dct.Items()(1) = SectionName(2)
-    Debug.Assert dct.Items()(2) = SectionName(3)
+    Debug.Assert dct.Items()(0) = TestProc_SectionName(1)
+    Debug.Assert dct.Items()(1) = TestProc_SectionName(2)
+    Debug.Assert dct.Items()(2) = TestProc_SectionName(3)
 
 xt: mErH.EoP ErrSrc(PROC)
-    TestFilesRemove
+    TestProc_RemoveTestFiles
     Set fso = Nothing
     Set dct = Nothing
     Exit Sub
@@ -968,55 +851,55 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_56_File_PrivateProperty_Exists()
+Public Sub Test_96_PrivateProfile_File_Items_Exists()
 ' ----------------------------------------------------
 '
 ' ----------------------------------------------------
-    Const PROC = "Test_56_File_PrivateProperty_Exists"
+    Const PROC = "Test_96_PrivateProfile_File_Items_Exists"
 
     On Error GoTo eh
     Dim sFile   As String
     
     '~~ Test preparation
-    sFile = TestFileWithSections(ts_sections:=10, ts_values:=3)
+    sFile = TestProc_PrivateProfile_File(ts_sections:=10, ts_values:=3)
     
     mErH.BoP ErrSrc(PROC)
     '~~ Section by name in file
     Debug.Assert mFile.SectionExists(pp_file:=sFile _
-                                  , pp_section:=SectionName(9) _
+                                   , pp_section:=TestProc_SectionName(9) _
                                     )
     '~~ Value name in any section
     Debug.Assert mFile.ValueNameExists(pp_file:=sFile _
-                                  , pp_valuename:=ValueName(9, 3) _
+                                     , pp_valuename:=TestProc_ValueName(9, 3) _
                                     )
     '~~ Value name in a named section
     Debug.Assert mFile.ValueNameExists(pp_file:=sFile _
-                                     , pp_sections:=SectionName(7) _
-                                     , pp_valuename:=ValueName(7, 3) _
+                                     , pp_sections:=TestProc_SectionName(7) _
+                                     , pp_valuename:=TestProc_ValueName(7, 3) _
                                       )
     '~~ Value name not in named section
     Debug.Assert Not mFile.ValueNameExists(pp_file:=sFile _
-                                         , pp_sections:=SectionName(7) _
-                                         , pp_valuename:=ValueName(6, 3) _
+                                         , pp_sections:=TestProc_SectionName(7) _
+                                         , pp_valuename:=TestProc_ValueName(6, 3) _
                                           )
     
     '~~ Value in any section
     Debug.Assert mFile.ValueExists(pp_file:=sFile _
-                                 , pp_value:=ValueString(8, 3) _
+                                 , pp_value:=TestProc_ValueString(8, 3) _
                                   )
     
     '~~ Value in named section
     Debug.Assert mFile.ValueExists(pp_file:=sFile _
-                                 , pp_sections:=SectionName(7) _
-                                 , pp_value:=ValueString(7, 3) _
+                                 , pp_sections:=TestProc_SectionName(7) _
+                                 , pp_value:=TestProc_ValueString(7, 3) _
                                   )
     '~~ Value not in named section
     Debug.Assert Not mFile.ValueExists(pp_file:=sFile _
-                                     , pp_sections:=SectionName(7) _
-                                     , pp_value:=ValueString(6, 3) _
+                                     , pp_sections:=TestProc_SectionName(7) _
+                                     , pp_value:=TestProc_ValueString(6, 3) _
                                       )
 xt: mErH.EoP ErrSrc(PROC)
-    TestFilesRemove
+    TestProc_RemoveTestFiles
     Exit Sub
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
@@ -1025,14 +908,15 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
     End Select
 End Sub
 
-Public Sub Test_60_File_SectionsCopy()
+Public Sub Test_97_PrivateProfile_File_SectionsCopy()
 ' ------------------------------------------------
 ' This test relies on successfully tests:
-' - Test_55_File_SectionNames (mFile.SectionNames)
+' - Test_95_PrivateProfile_File_SectionsNames (mFile.SectionNames)
 ' Iplicitely tested are:
 ' - mFile.Sections Get and Let
 ' ------------------------------------------------
-    Const PROC = "Test_60_File_SectionsCopy"
+    Const PROC = "Test_97_PrivateProfile_File_SectionsCopy"
+    
     On Error GoTo eh
     Dim fso             As New FileSystemObject
     Dim sFileGet        As String
@@ -1041,7 +925,7 @@ Public Sub Test_60_File_SectionsCopy()
     Dim dct             As Dictionary
     
     '~~ Test preparation
-    sFileGet = TestFileWithSections(ts_sections:=20, ts_values:=10)
+    sFileGet = TestProc_PrivateProfile_File(ts_sections:=20, ts_values:=10)
     
     mErH.BoP ErrSrc(PROC)
     
@@ -1055,7 +939,7 @@ Public Sub Test_60_File_SectionsCopy()
     '~~ Test 1: Assert result
     Set dct = mFile.SectionNames(sFileLet)
     Debug.Assert dct.Count = 1
-    Debug.Assert dct.Keys()(0) = SectionName(1)
+    Debug.Assert dct.Keys()(0) = TestProc_SectionName(1)
     fso.DeleteFile sFileLet
     
     
@@ -1067,23 +951,23 @@ Public Sub Test_60_File_SectionsCopy()
     '~~ Test 2: Assert result
     Set dct = mFile.SectionNames(sFileLet)
     Debug.Assert dct.Count = 20
-    Debug.Assert dct.Keys()(0) = SectionName(1)
-    Debug.Assert dct.Keys()(1) = SectionName(2)
-    Debug.Assert dct.Keys()(2) = SectionName(3)
+    Debug.Assert dct.Keys()(0) = TestProc_SectionName(1)
+    Debug.Assert dct.Keys()(1) = TestProc_SectionName(2)
+    Debug.Assert dct.Keys()(2) = TestProc_SectionName(3)
     fso.DeleteFile sFileLet
        
     '~~ Test 3: Order sections in ascending sequence
-    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & SectionName(20) & "]"
+    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & TestProc_SectionName(20) & "]"
     
     mFile.SectionsCopy pp_source:=sFileGet _
                      , pp_target:=sFileGet _
                      , pp_replace:=True ' essential to get them re-ordered in ascending sequence
     
     '~~ Test 3: Assert result
-    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & SectionName(1) & "]"
+    Debug.Assert mFile.Arry(sFileGet)(0) = "[" & TestProc_SectionName(1) & "]"
             
 xt: mErH.EoP ErrSrc(PROC)
-    TestFilesRemove
+    TestProc_RemoveTestFiles
     Set fso = Nothing
     Exit Sub
     
@@ -1092,25 +976,4 @@ eh: Select Case ErrMsg(ErrSrc(PROC))
         Case Else:      GoTo xt
     End Select
 End Sub
-
-Public Sub Test_99_FileExists_NoFileObject_NoString()
-    Const PROC = "Test_99_FileExists_NoFileObject_NoString"
-    
-    On Error GoTo eh
-
-    Status = ErrSrc(PROC)
-    mErH.BoP ErrSrc(PROC)
-    mFile.Exists ThisWorkbook
-    Debug.Assert AppErr(1)
-        
-xt: mErH.EoP ErrSrc(PROC)
-    Exit Sub
-    
-eh: Select Case ErrMsg(ErrSrc(PROC))
-        Case vbResume:  Stop: Resume
-        Case Else:      GoTo xt
-    End Select
-End Sub
-
-
 
