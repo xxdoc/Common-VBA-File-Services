@@ -1,47 +1,60 @@
 ## VBA File Services
 ### Common services
 
-| Name           | Service                                    |
-| -------------- | ------------------------------------------ |
-| Arry           | Get: Returns the content of a text file as an array.|
-|                | Let: Write the content of an array to a file |    
-| Compare        | Function: Displays the differences between two files by means of WinMerge |
-| Delete         | Deletes a file provided either as object or as full name when it exists  |
-| Dict           | Returns the content of a test file as Dictionary |
-| Differs        | Returns a Dictionary of those records which differ between two files providing an _ignore case_ and _ignore empty records_ option |
-| Exists         | Returns True when a given folder, file, section, or value-name exists, returns a collection of all files found. Syntax:<br>`mFile.Exists(folder[, file[, section[, value-name]]]` |
-| Extension      | Returns a the extension of file's name. The file may be provided either as file object or as full name|
-| GetFile        | Returns a file object for given file's full name |
-| Search         | Returns a collection of all files found supporting wildcards and sub-folders | 
-| SelectFile     | Returns the full name of a file selected in a dialog |
-| Temp           | Property Get: Provides the full name of an arbitrary named file, by default in the current directory or in a given path with and optional extension which defaults to .tmp | 
-| Txt            | Get: Returns the content of a text file as string, returns the split string/character for the VBA.Split operation which may be used to transfer the string into an array |
-|                | Let: Writes a text string, optionally intermitted by vbCrLf, to a file - optionally appended. |
+| Service      | Description                                |
+| ------------ | ------------------------------------------ |
+| _Arry_       | Get: Returns the content of a text file as an array.|
+|              | Let: Write the content of an array to a file |    
+| _Compare_    | Function: Displays the differences between two files by means of WinMerge |
+| _Delete_     | Deletes a file provided either as object or as full name when it exists  |
+| _Dict_       | Returns the content of a test file as Dictionary |
+| _Differs_    | Returns a Dictionary of those records which differ between two files providing an _ignore case_ and _ignore empty records_ option |
+| _Exists_     | See [below](#exists) |
+| _Extension_  | Returns a the extension of file's name. The file may be provided either as file object or as full name|
+| _GetFile_    | Returns a file object for given file's full name |
+| _Search_     | Returns a collection of all files found supporting wildcards and sub-folders | 
+| _SelectFile_ | Returns the full name of a file selected in a dialog |
+| _Temp_       | Property Get: Provides the full name of an arbitrary named file, by default in the current directory or in a given path with and optional extension which defaults to .tmp | 
+| _Txt_        | Get: Returns the content of a text file as string, returns the split string/character for the VBA.Split operation which may be used to transfer the string into an array |
+|              | Let: Writes a text string, optionally intermitted by vbCrLf, to a file - optionally appended. |
+
+#### _Exists_ service
+A kind of a universal existence check service with the following syntax:<br>`mFile.Exists([folder][, file][, section][, value-name][, result_folder][, result_files]`)<br>
+The service has the following named arguments:
+
+| Service              | Description                                |
+| -------------------- | ------------------------------------------ |
+| _ex\_folder_         | Optional, string expression.<br>The service returns TRUE when the folder exists and no other argument is provided |
+| _ex\_file_           | Optional, string expression.<br>When the _ex\_folder_ argument is provided this argument is supposed to be a file name only string which may or may not contain wildcard characters (specification fo a _LIKE_ operator). The function returns any file in any sub-folder which matches the argument string. The function returns TRUE when at least one file matched. When the _ex\_folder_ argument is not provided it is assumed that the argument specifies a full file name and the service returns TRUE when no other arguments are provided |
+| _ex\_section_        | Optional, string expression.<br>The service returns TRUE when exactly one existing file matched the above provided arguments and no  _ex\_value\_name_ argument is provided. |
+| _ex\_value\_name_    | Optional, string expression.<br>The service returns TRUE when a value with the provide name exists in the provided existing section in the provided existing file  |
+| _ex\_result\_folder_ | Optional, Folder expression. Folder object when the _ex\_folder_ argument is an existing folder, else Nothing. |
+| _ex\_result\_files_  | Optional, Collection expression.<br>A Collection of file objects with proved  existence |
 
 ### _PrivateProfile File_ services
 Simplifies the handling of .ini, .cfg, or any other file organized by [section] value-name=value. Consequently all services use the following named arguments:
 
-| Name           | Description                                                                     |
-| -------------- | ------------------------------------------------------------------------------- |
-| pp_file        | Variant expression, either a _PrivateProfile File's_ full name or a file object |
-| pp_section     | String expression, the name of a _Section_                                      |
-| pp_value_name  | String expression, the name of a _Value_ under a given _Section_                |
-| pp_value       | Variant expression, will be written to the file as string                       |
+| Name               | Description                                                                     |
+| ------------------ | ------------------------------------------------------------------------------- |
+| _pp\_file_         | Variant expression, either a _PrivateProfile File's_ full name or a file object |
+| _pp\_section_      | String expression, the name of a _Section_                                      |
+| _pp\_value\_name_  | String expression, the name of a _Value_ under a given _Section_                |
+| _pp\_value_        | Variant expression, will be written to the file as string                       |
 
-| Name           | Service                                      |
-| -------------- | -------------------------------------------- |
-| NameRemove     | Sub: Removes a named value entry from a file |
+| Name             | Service                                      |
+| ---------------- | -------------------------------------------- |
+| _NameRemove_     | Removes a named value entry from a given section in a _PrivateProfile File_ file |
 |                | Syntax:<br>`mFile.NameRemove file, section, valuename` |
-| Sections       | Returns the sections if a _PrivateProfile File_ as Dictionary with the _Section_ as the key and the _Values_ (see below) as the item |
-| SectionExists  | Returns True when a given section [.....] exists in the file. |
+| _Sections_       | Returns the sections if a _PrivateProfile File_ as Dictionary with the _Section_ as the key and the _Values_ (see below) as the item |
+| _SectionExists_  | Returns True when a given section [.....] exists in a _PrivateProfile File_ file. |
 |                | Syntax:<br>`If mFile.SectionExists(file, section) Then ...`|
-| SectionsCopy   | Sub: Uses Sections Get/Let to copy named - or when omitted all - sections from a source to a target file, with the target file sections optionally replaced, by default is merged. When all sections are copied (i.e. no section names are provided), the option replace is used, and the target file is identical with the source file the sections will only be reorganized in ascending order. |
+| _SectionsCopy_   | Copies named sections from a source _PrivateProfile File_ file to a target _PrivateProfile File_ file optionally replaced or merged in the target file. |
 |                | Syntax:<br>`mFile.SectionsCopy source-file, target-file[, sections][, replace]`|
-| SectionsRemove | Sub: Removes the named or all sections [.....] from a file |
+| _SectionsRemove_ | Removes named or all sections [.....] from a  _PrivateProfile File_ file |
 |                | Syntax:<br>`mFile.SectionsRemove file, section`
-| Value          | Get: Returns the value for a given name from a given section from a _PrivateProfile File_ <br>Syntax: `v = mFile.Value(file, section, name)`|
+| _Value_          | Get: Returns the value for a given name from a given section from a _PrivateProfile File_ <br>Syntax: `v = mFile.Value(file, section, name)`|
 |                | Let: write a value with a given name under a given section in a _PrivateProfile File_ <br>Syntax: `mFile.Value(file, section, name) = value`|
-| Values         | Returns the values from a given _PrivateProfile File_ under a given _Section_ as Dictionary with the value name as the key and the value as the item.<br>Syntax: `Set dct = mFile.Values(file, section)` |
+| _Values_         | Returns the values from a given _PrivateProfile File_ under a given _Section_ as Dictionary with the value name as the key and the value as the item.<br>Syntax: `Set dct = mFile.Values(file, section)` |
    
 
 ## Installation
