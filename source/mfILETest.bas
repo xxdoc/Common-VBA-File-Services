@@ -30,6 +30,17 @@ Private Property Let Test_Status(ByVal s As String)
     End If
 End Property
 
+Private Function AppErr(ByVal app_err_no As Long) As Long
+' ------------------------------------------------------------------------------
+' Ensures that a programmed (i.e. an application) error numbers never conflicts
+' with the number of a VB runtime error. Thr function returns a given positive
+' number (app_err_no) with the vbObjectError added - which turns it into a
+' negative value. When the provided number is negative it returns the original
+' positive "application" error number e.g. for being used with an error message.
+' ------------------------------------------------------------------------------
+    If app_err_no >= 0 Then AppErr = app_err_no + vbObjectError Else AppErr = Abs(app_err_no - vbObjectError)
+End Function
+
 Private Function ErrMsg(ByVal err_source As String, _
                Optional ByVal err_no As Long = 0, _
                Optional ByVal err_dscrptn As String = vbNullString, _
@@ -116,7 +127,7 @@ Private Function ErrMsg(ByVal err_source As String, _
     '~~ Obtain error information from the Err object for any argument not provided
     If err_no = 0 Then err_no = Err.Number
     If err_line = 0 Then ErrLine = Erl
-    If err_source = vbNullString Then err_source = Err.Source
+    If err_source = vbNullString Then err_source = Err.source
     If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
     If err_dscrptn = vbNullString Then err_dscrptn = "--- No error description available ---"
     

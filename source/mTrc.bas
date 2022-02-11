@@ -472,7 +472,6 @@ xt: Set cll = Nothing
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
 End Sub
@@ -499,7 +498,6 @@ xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
     Set Trace = Nothing
@@ -529,7 +527,6 @@ xt: Set cll = Nothing
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
 End Sub
@@ -555,7 +552,6 @@ xt: Set cll = Nothing
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
 End Sub
@@ -582,7 +578,6 @@ xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
     Set Trace = Nothing
@@ -657,7 +652,6 @@ xt: mTrc.Terminate
     
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Resume Next
         Case Else:  GoTo xt
     End Select
 End Sub
@@ -841,7 +835,6 @@ xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
     Set Trace = Nothing
@@ -928,7 +921,6 @@ xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
     Set Trace = Nothing
@@ -1024,7 +1016,6 @@ xt: Exit Function
 
 eh: Select Case ErrMsg(ErrSrc(PROC))
         Case vbYes: Stop: Resume
-        Case vbNo:  Stop: Resume Next
         Case Else:  GoTo xt
     End Select
 End Function
@@ -1184,7 +1175,7 @@ Private Function ErrMsg(ByVal err_source As String, _
     '~~ Obtain error information from the Err object for any argument not provided
     If err_no = 0 Then err_no = Err.Number
     If err_line = 0 Then ErrLine = Erl
-    If err_source = vbNullString Then err_source = Err.Source
+    If err_source = vbNullString Then err_source = Err.source
     If err_dscrptn = vbNullString Then err_dscrptn = Err.Description
     If err_dscrptn = vbNullString Then err_dscrptn = "--- No error description available ---"
     
