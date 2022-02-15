@@ -1,11 +1,32 @@
+22-02-16 00:11:21                 >> Export Changed (by Addin) for File.xlsb: 
+22-02-16 00:11:21 00,0000         |  >> mCompMan.ExportChangedComponents
+22-02-16 00:11:21 00,0592         |  |  >> mService.ExportChangedComponents
+22-02-16 00:11:21 00,1185         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-02-16 00:11:21 00,1415 00,0230 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-02-16 00:11:21 00,1421         |  |  |  >> mExport.ChangedComponents
+22-02-16 00:11:22 00,8029 00,6608 |  |  |  << mExport.ChangedComponents
+22-02-16 00:11:22 00,8036 00,7444 |  |  << mService.ExportChangedComponents
+22-02-16 00:11:22 00,8042 00,8042 |  << mCompMan.ExportChangedComponents
+22-02-16 00:11:22 00,8042 00,8042 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0005 seconds!
 
-        >> 22-02-11 19:12:20 'ExportChangedComponents(CompMan.xlam)' for 'File.xlsb': 
-        |  >> mCompMan.ExportChangedComponents
-        |  |  >> mService.ExportChangedComponents
-        |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
- 00,022 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-        |  |  |  >> mExport.ChangedComponents
- 01,089 |  |  |  << mExport.ChangedComponents
- 01,155 |  |  << mService.ExportChangedComponents
- 01,194 |  << mCompMan.ExportChangedComponents
-        << 22-02-11 19:12:21 'ExportChangedComponents(CompMan.xlam)' for 'File.xlsb': 
+22-02-16 00:45:00                 >> Export Changed (by Addin) for File.xlsb: 
+22-02-16 00:45:00 00,0000         |  >> mCompMan.ExportChangedComponents
+22-02-16 00:45:00 00,0463         |  |  >> mService.ExportChangedComponents
+22-02-16 00:45:00 00,0913         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-02-16 00:45:00 00,1129 00,0216 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-02-16 00:45:00 00,1135         |  |  |  >> mExport.ChangedComponents
+22-02-16 00:45:01 00,8021 00,6886 |  |  |  << mExport.ChangedComponents
+22-02-16 00:45:01 00,8029 00,7566 |  |  << mService.ExportChangedComponents
+22-02-16 00:45:01 00,8035 00,8035 |  << mCompMan.ExportChangedComponents
+22-02-16 00:45:01 00,8035 00,8035 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0005 seconds!
+
+22-02-16 00:50:58                 >> Export Changed (by Addin) for File.xlsb: 
+22-02-16 00:50:58 00,0000         |  >> mCompMan.ExportChangedComponents
+22-02-16 00:50:58 00,0484         |  |  >> mService.ExportChangedComponents
+22-02-16 00:50:58 00,0938         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-02-16 00:50:58 00,1147 00,0209 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-02-16 00:50:58 00,1153         |  |  |  >> mExport.ChangedComponents
+22-02-16 00:50:59 00,7770 00,6617 |  |  |  << mExport.ChangedComponents
+22-02-16 00:50:59 00,7779 00,7295 |  |  << mService.ExportChangedComponents
+22-02-16 00:50:59 00,7785 00,7785 |  << mCompMan.ExportChangedComponents
+22-02-16 00:50:59 00,7785 00,7785 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0006 seconds!
