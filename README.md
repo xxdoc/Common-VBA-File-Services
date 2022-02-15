@@ -56,15 +56,18 @@ Simplifies the handling of .ini, .cfg, or any other file organized by [section] 
 |                | Let: write a value with a given name under a given section in a _PrivateProfile File_ <br>Syntax: `mFile.Value(file, section, name) = value`|
 | _Values_         | Returns the values from a given _PrivateProfile File_ under a given _Section_ as Dictionary with the value name as the key and the value as the item.<br>Syntax: `Set dct = mFile.Values(file, section)` |
    
-
 ## Installation
 Download and import [mFile.bas][1] to your VB project.
 
 ## Usage
 See table above
 
+See also: [Conflicts with personal and public _Common Components_][3]
+
+
 ## Contribution
 Any kind of contribution is welcome. Respecting the (more or less obvious) coding principles will be appreciated.
 
 [1]:https://gitcdn.link/cdn/warbe-maker/Common-VBA-File-Services/master/source/mFile.bas
 [2]:https://gitcdn.link/cdn/warbe-maker/Common-VBA-Directory-Services/master/source/mDct.bas
+[3]:https://warbe-maker.github.io/vba/common/2022/02/15/Personal-and-public-Common-Components.html
