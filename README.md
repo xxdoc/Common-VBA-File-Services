@@ -57,12 +57,13 @@ Simplifies the handling of .ini, .cfg, or any other file organized by [section] 
 | _Values_         | Returns the values from a given _PrivateProfile File_ under a given _Section_ as Dictionary with the value name as the key and the value as the item.<br>Syntax: `Set dct = mFile.Values(file, section)` |
    
 ## Installation
-Download and import [mFile.bas][1] to your VB project.
+1. Download and import [mFile.bas][1] to your VB project.
+2. In the VBE add a Reference to _Microsoft Scripting Runtime_
 
 ## Usage
+See table above.
 > This _Common Component_ is prepared to function completely autonomously ( download, import, use) but at the same time to integrate with my personal 'standard' VB-Project design. See [Conflicts with personal and public _Common Components_][3] for more details.
 
-See table above.
 
 
 ## Contribution
