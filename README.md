@@ -60,9 +60,9 @@ Simplifies the handling of .ini, .cfg, or any other file organized by [section] 
 Download and import [mFile.bas][1] to your VB project.
 
 ## Usage
-See table above
+> This _Common Component_ is prepared to function completely autonomously ( download, import, use) but at the same time to integrate with my personal 'standard' VB-Project design. See [Conflicts with personal and public _Common Components_][3] for more details.
 
-See also: [Conflicts with personal and public _Common Components_][3]
+See table above.
 
 
 ## Contribution
