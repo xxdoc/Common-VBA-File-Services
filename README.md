@@ -19,7 +19,7 @@
 |              | Let: Writes a text string, optionally intermitted by vbCrLf, to a file - optionally appended. |
 
 #### _Exists_ service
-A kind of a universal existence check service with the following syntax:<br>`mFile.Exists([folder][, file][, section][, value-name][, result_folder][, result_files]`)<br>
+A kind of a universal existence check service with the following syntax:<br>`mFile.Exists([folder], [file], [section], [value-name], [result_folder], [result_files]`)<br>
 The service has the following named arguments:
 
 | Service              | Description                                |
@@ -49,7 +49,7 @@ Simplifies the handling of .ini, .cfg, or any other file organized by [section] 
 | _SectionExists_  | Returns True when a given section [.....] exists in a _PrivateProfile File_ file. |
 |                | Syntax:<br>`If mFile.SectionExists(file, section) Then ...`|
 | _SectionsCopy_   | Copies named sections from a source _PrivateProfile File_ file to a target _PrivateProfile File_ file optionally replaced or merged in the target file. |
-|                | Syntax:<br>`mFile.SectionsCopy source-file, target-file[, sections][, replace]`|
+|                | Syntax:<br>`mFile.SectionsCopy source-file, target-file, [sections], [replace]`|
 | _SectionsRemove_ | Removes named or all sections [.....] from a  _PrivateProfile File_ file |
 |                | Syntax:<br>`mFile.SectionsRemove file, section`
 | _Value_          | Get: Returns the value for a given name from a given section from a _PrivateProfile File_ <br>Syntax: `v = mFile.Value(file, section, name)`|
