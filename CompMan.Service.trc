@@ -1,142 +1,15 @@
-22-02-16 00:11:21                 >> Export Changed (by Addin) for File.xlsb: 
-22-02-16 00:11:21 00,0000         |  >> mCompMan.ExportChangedComponents
-22-02-16 00:11:21 00,0592         |  |  >> mService.ExportChangedComponents
-22-02-16 00:11:21 00,1185         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 00:11:21 00,1415 00,0230 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 00:11:21 00,1421         |  |  |  >> mExport.ChangedComponents
-22-02-16 00:11:22 00,8029 00,6608 |  |  |  << mExport.ChangedComponents
-22-02-16 00:11:22 00,8036 00,7444 |  |  << mService.ExportChangedComponents
-22-02-16 00:11:22 00,8042 00,8042 |  << mCompMan.ExportChangedComponents
-22-02-16 00:11:22 00,8042 00,8042 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0005 seconds!
-
-22-02-16 00:45:00                 >> Export Changed (by Addin) for File.xlsb: 
-22-02-16 00:45:00 00,0000         |  >> mCompMan.ExportChangedComponents
-22-02-16 00:45:00 00,0463         |  |  >> mService.ExportChangedComponents
-22-02-16 00:45:00 00,0913         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 00:45:00 00,1129 00,0216 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 00:45:00 00,1135         |  |  |  >> mExport.ChangedComponents
-22-02-16 00:45:01 00,8021 00,6886 |  |  |  << mExport.ChangedComponents
-22-02-16 00:45:01 00,8029 00,7566 |  |  << mService.ExportChangedComponents
-22-02-16 00:45:01 00,8035 00,8035 |  << mCompMan.ExportChangedComponents
-22-02-16 00:45:01 00,8035 00,8035 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0005 seconds!
-
-22-02-16 00:50:58                 >> Export Changed (by Addin) for File.xlsb: 
-22-02-16 00:50:58 00,0000         |  >> mCompMan.ExportChangedComponents
-22-02-16 00:50:58 00,0484         |  |  >> mService.ExportChangedComponents
-22-02-16 00:50:58 00,0938         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 00:50:58 00,1147 00,0209 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 00:50:58 00,1153         |  |  |  >> mExport.ChangedComponents
-22-02-16 00:50:59 00,7770 00,6617 |  |  |  << mExport.ChangedComponents
-22-02-16 00:50:59 00,7779 00,7295 |  |  << mService.ExportChangedComponents
-22-02-16 00:50:59 00,7785 00,7785 |  << mCompMan.ExportChangedComponents
-22-02-16 00:50:59 00,7785 00,7785 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0006 seconds!
-
-22-02-16 11:30:32                 >> Update Outdated (by Addin) for File.xlsb: 
-22-02-16 11:30:32 00,0000         |  >> mCompMan.UpdateOutdatedCommonComponents
-22-02-16 11:30:32 00,1157         |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:30:32 00,1652 00,0495 |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:30:32 00,1658         |  |  >> mUpdate.Outdated
-22-02-16 11:30:33 00,5090         |  |  |  >> mUpdate.UpdateConfirmed
-22-02-16 11:30:34 02,3035 01,7945 |  |  |  << mUpdate.UpdateConfirmed
-22-02-16 11:30:34 02,3048         |  |  |  >> mRenew.ByImport
-22-02-16 11:30:34 02,3052         |  |  |  |  >> mRenew.SaveWbk
-22-02-16 11:30:35 02,9556 00,6505 |  |  |  |  << mRenew.SaveWbk
-22-02-16 11:30:35 02,9563         |  |  |  |  > Rename the to-be-re-imported component
-22-02-16 11:30:35 02,9591 00,0028 |  |  |  |  < Rename the to-be-re-imported component
-22-02-16 11:30:35 02,9595         |  |  |  |  > Import the Raw Common Component
-22-02-16 11:30:35 02,9669 00,0074 |  |  |  |  < Import the Raw Common Component
-22-02-16 11:30:35 02,9676         |  |  |  |  > Export the Used Common Component
-22-02-16 11:30:35 02,9791 00,0115 |  |  |  |  < Export the Used Common Component
-22-02-16 11:30:35 02,9796         |  |  |  |  >> mRenew.SaveWbk
-22-02-16 11:30:36 03,5765 00,5970 |  |  |  |  << mRenew.SaveWbk
-22-02-16 11:30:36 03,5770 01,2722 |  |  |  << mRenew.ByImport
-22-02-16 11:30:36 03,6065 03,4407 |  |  << mUpdate.Outdated
-22-02-16 11:30:36 03,6075 03,6075 |  << mCompMan.UpdateOutdatedCommonComponents
-22-02-16 11:30:36 03,6075 03,6075 << Update Outdated (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0009 seconds!
-
-22-02-16 11:45:19                 >> Export Changed (by Addin) for File.xlsb: 
-22-02-16 11:45:19 00,0000         |  >> mCompMan.ExportChangedComponents
-22-02-16 11:45:19 00,0569         |  |  >> mService.ExportChangedComponents
-22-02-16 11:45:19 00,1088         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:45:19 00,1315 00,0226 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:45:19 00,1320         |  |  |  >> mExport.ChangedComponents
-22-02-16 11:45:20 01,1077 00,9757 |  |  |  << mExport.ChangedComponents
-22-02-16 11:45:20 01,1086 01,0517 |  |  << mService.ExportChangedComponents
-22-02-16 11:45:20 01,1093 01,1093 |  << mCompMan.ExportChangedComponents
-22-02-16 11:45:20 01,1093 01,1093 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0006 seconds!
-
-22-02-16 11:51:12                 >> Export Changed (by Addin) for File.xlsb: 
-22-02-16 11:51:12 00,0000         |  >> mCompMan.ExportChangedComponents
-22-02-16 11:51:12 00,0456         |  |  >> mService.ExportChangedComponents
-22-02-16 11:51:12 00,0901         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:51:12 00,1107 00,0205 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:51:12 00,1112         |  |  |  >> mExport.ChangedComponents
-22-02-16 11:51:12 00,3822         |  |  |  |  >> mCompMan.ExportChangedComponents
-22-02-16 11:51:12 00,4273         |  |  |  |  |  >> mService.ExportChangedComponents
-22-02-16 11:51:12 00,4731         |  |  |  |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:51:12 00,4939 00,0208 |  |  |  |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:51:12 00,4946         |  |  |  |  |  |  >> mExport.ChangedComponents
-22-02-16 11:51:13 01,3699 00,8753 |  |  |  |  |  |  << mExport.ChangedComponents
-22-02-16 11:51:13 01,3710 00,9438 |  |  |  |  |  << mService.ExportChangedComponents
-22-02-16 11:51:13 01,3720 00,9898 |  |  |  |  << mCompMan.ExportChangedComponents
-22-02-16 11:51:18 06,7942 06,6830 |  |  |  << mExport.ChangedComponents !!! VB-Runtime Error 91  !!! 
-
-22-02-16 11:53:23                 >> Export Changed (by Addin) for File.xlsb: 
-22-02-16 11:53:23 00,0000         |  >> mCompMan.ExportChangedComponents
-22-02-16 11:53:23 00,0485         |  |  >> mService.ExportChangedComponents
-22-02-16 11:53:23 00,0959         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:53:23 00,1174 00,0216 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:53:23 00,1180         |  |  |  >> mExport.ChangedComponents
-22-02-16 11:54:02 38,4117 38,2937 |  |  |  << mExport.ChangedComponents
-22-02-16 11:54:02 38,4126 38,3641 |  |  << mService.ExportChangedComponents
-22-02-16 11:54:02 38,4136 38,4136 |  << mCompMan.ExportChangedComponents
-22-02-16 11:54:02 38,4136 38,4136 << Export Changed (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0008 seconds!
-
-22-02-16 11:54:31                 >> Update Outdated (by Addin) for File.xlsb: 
-22-02-16 11:54:31 00,0000         |  >> mCompMan.UpdateOutdatedCommonComponents
-22-02-16 11:54:31 00,0484         |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:54:31 00,0690 00,0206 |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 11:54:31 00,0697         |  |  >> mUpdate.Outdated
-22-02-16 11:54:31 00,3667 00,2970 |  |  << mUpdate.Outdated
-22-02-16 11:54:31 00,3674 00,3674 |  << mCompMan.UpdateOutdatedCommonComponents
-22-02-16 11:54:31 00,3674 00,3674 << Update Outdated (by Addin) for File.xlsb: . Impact on performance (caused by the trace) was 00,0007 seconds!
-
-22-02-16 14:21:17 Execution trace by 'Common VBA Execution Trace Service' (https://github.com/warbe-maker/Common-VBA-Execution-Trace-Service)
-22-02-16 14:21:17                 >> Update Outdated (by Addin) for File.xlsb: 
-22-02-16 14:21:17 00,0000         |  >> mCompMan.UpdateOutdatedCommonComponents
-22-02-16 14:21:17 00,1284         |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 14:21:17 00,2469 00,1185 |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 14:21:17 00,2483         |  |  >> mUpdate.Outdated
-22-02-16 14:21:17 00,6564         |  |  |  >> mUpdate.UpdateConfirmed
-22-02-16 14:21:27 10,3134 09,6571 |  |  |  << mUpdate.UpdateConfirmed
-22-02-16 14:21:27 10,3155         |  |  |  >> mRenew.ByImport
-22-02-16 14:21:27 10,3161         |  |  |  |  >> mRenew.SaveWbk
-22-02-16 14:21:28 10,7581 00,4420 |  |  |  |  << mRenew.SaveWbk
-22-02-16 14:21:28 10,7591         |  |  |  |  > Rename the to-be-re-imported component
-22-02-16 14:21:28 10,7921 00,0330 |  |  |  |  < Rename the to-be-re-imported component
-22-02-16 14:21:28 10,7926         |  |  |  |  > Import the Raw Common Component
-22-02-16 14:21:28 10,7977 00,0051 |  |  |  |  < Import the Raw Common Component
-22-02-16 14:21:28 10,7983         |  |  |  |  > Export the Used Common Component
-22-02-16 14:21:28 10,8120 00,0137 |  |  |  |  < Export the Used Common Component
-22-02-16 14:21:28 10,8127         |  |  |  |  >> mRenew.SaveWbk
-22-02-16 14:21:28 11,6100 00,7973 |  |  |  |  << mRenew.SaveWbk
-22-02-16 14:21:28 11,6107 01,2952 |  |  |  << mRenew.ByImport
-22-02-16 14:21:28 11,6658 11,4174 |  |  << mUpdate.Outdated
-22-02-16 14:21:28 11,6666 11,6666 |  << mCompMan.UpdateOutdatedCommonComponents
-22-02-16 14:21:28 11,6666 11,6666 << Update Outdated (by Addin) for File.xlsb: 
-22-02-16 14:21:28                 Impact on the overall performance (caused by the trace itself): 00,0007 seconds!
-22-02-16 14:21:28 Execution trace by 'Common VBA Execution Trace Service' (https://github.com/warbe-maker/Common-VBA-Execution-Trace-Service)
-
-22-02-16 14:26:35 Execution trace by 'Common VBA Execution Trace Service' (https://github.com/warbe-maker/Common-VBA-Execution-Trace-Service)
-22-02-16 14:26:35                 >> Export Changed (by Addin) for File.xlsb: 
-22-02-16 14:26:35 00,0000         |  >> mCompMan.ExportChangedComponents
-22-02-16 14:26:35 00,0521         |  |  >> mService.ExportChangedComponents
-22-02-16 14:26:35 00,1023         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 14:26:35 00,1309 00,0286 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
-22-02-16 14:26:35 00,1316         |  |  |  >> mExport.ChangedComponents
-22-02-16 14:26:36 00,8856 00,7539 |  |  |  << mExport.ChangedComponents
-22-02-16 14:26:36 00,8864 00,8343 |  |  << mService.ExportChangedComponents
-22-02-16 14:26:36 00,8872 00,8872 |  << mCompMan.ExportChangedComponents
-22-02-16 14:26:36 00,8872 00,8872 << Export Changed (by Addin) for File.xlsb: 
-22-02-16 14:26:36                 Impact on the overall performance (caused by the trace itself): 00,0007 seconds!
-22-02-16 14:26:36 Execution trace by 'Common VBA Execution Trace Service' (https://github.com/warbe-maker/Common-VBA-Execution-Trace-Service)
+22-04-13 19:16:11 Execution trace by 'Common VBA Execution Trace Service' (https://github.com/warbe-maker/Common-VBA-Execution-Trace-Service)
+22-04-13 19:16:11                 >> Export Changed (by Addin) for File.xlsb: 
+22-04-13 19:16:11 00,0000         |  >> mCompMan.ExportChangedComponents
+22-04-13 19:16:11 00,0402         |  |  >> mService.ExportChangedComponents
+22-04-13 19:16:11 00,0750         |  |  |  >> mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-04-13 19:16:11 00,1027 00,0277 |  |  |  << mCompMan.MaintainPropertiesOfHostedRawCommonComponents
+22-04-13 19:16:11 00,1084         |  |  |  >> mExport.ChangedComponents
+22-04-13 19:16:11 00,7755         |  |  |  |  >> mService.RemoveTempRenamed
+22-04-13 19:16:11 00,7810 00,0055 |  |  |  |  << mService.RemoveTempRenamed
+22-04-13 19:16:11 00,7853 00,6769 |  |  |  << mExport.ChangedComponents
+22-04-13 19:16:11 00,7898 00,7496 |  |  << mService.ExportChangedComponents
+22-04-13 19:16:11 00,7950 00,7950 |  << mCompMan.ExportChangedComponents
+22-04-13 19:16:11 00,7950 00,7950 << Export Changed (by Addin) for File.xlsb: 
+22-04-13 19:16:11                 Impact on the overall performance (caused by the trace itself): 00,0052 seconds!
+22-04-13 19:16:11 Execution trace by 'Common VBA Execution Trace Service' (https://github.com/warbe-maker/Common-VBA-Execution-Trace-Service)
